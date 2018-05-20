@@ -44,6 +44,8 @@ contract HomomorphicTransaction {
         emit NewTransaction(numTxs);
         
         txouts[numTxs] = _outputs;
+        
+        numTxs++;
     }
     
     function send(uint[5][] _inputs, uint[3][] _outputs) public {
