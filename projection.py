@@ -46,6 +46,12 @@ class Ell:
         return ((x1*z2 - x2*z1) % self.p == 0) and ((y1*z2 - y2*z1) % self.p != 0)
 
     """
+    Return inverse of given point.
+    """
+    def inv(self, p):
+        return (p[0], (-p[1]) % self.p, p[2])
+
+    """
     Double given point.
     """
     def dbl(self, xyz):
@@ -107,11 +113,13 @@ class Ell:
         return tmp
 
     """
-    Convert given point to xy-coordinate.
+    Convert given point to xy-coordinate. If z == 0, returns "Origin".
     (x, y, z) |-> (x / z, y / z)
     """
     def toXY(self, xyz):
         x, y, z = xyz
+        if z % self.p == 0:
+            return "Origin"
         zinv = self.modinv(z)
         return (x*zinv % self.p, y*zinv % self.p)
 
@@ -183,17 +191,27 @@ class Ell:
 E = Ell(0,7,2**256 - 0x1000003D1)
 G = (0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798, 0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8, 1)
 n = 2**256 - 0x14551231950b75fc4402da1732fc9bebf
+
+G1 = E.scale(G, 10000)
+G3 = E.scale(G, 30000)
+G4 = E.scale(G, 40000)
+
 print("Is G on the curve?:", E.check(G))
 print("Is 2G on the curve?:", E.check(E.dbl(G)))
 print("Is 4G on the curve?:", E.check(E.dbl(E.dbl(G))))
 print("2G as xy-coordinate:", E.toXY(E.dbl(G)))
 print("4G as xy-coordinate:", E.toXY(E.dbl(E.dbl(G))))
-print("12345G as xy-coordinate:", E.toXY(E.scale(G, 12345)))
-print("10000G + 30000G == 40000G?:", E.eq(E.add(E.scale(G, 10000), E.scale(G, 30000)), E.scale(G, 40000)))
+print("10000G as xy-coordinate:", E.toXY(G1))
+print("10000G + 30000G == 40000G?:", E.eq(E.add(G1, G3), G4))
 print("Multiply by random 256-bit integer:", E.scale(G, random.randint(0, 2**256)))
-print("GetLine(P, Q, P):", E.scale(G, random.randint(0, 2**256)))
-print("GetLine(P, Q, P + Q):", E.scale(G, random.randint(0, 2**256)))
-print("Tate(100G, 10000G)", E.tate(E.scale(G, 100),  E.scale(G, 10000), n))
+print("isInv(P, inv(P)):", E.isInv(G3, E.inv(G3)))
+print("GetLine(P, Q, P):", E.getLine(G1, G3, G1))
+print("GetLine(P, Q, Q):", E.getLine(G1, G3, G3))
+print("GetLine(P, Q, -(P + Q)):", E.getLine(G1, G3, E.inv(G4)))
+
+val = lambda x: x[0]*E.modinv(x[1])%E.p
+print("e(G, 7777G)^(p^42 - 1)/n", pow(val(E.tate(G, E.scale(G, 7777), n)), (E.p**42 - 1) // n, E.p))
+print("e(7777G, G)^(p^42 - 1)/n", pow(val(E.tate(E.scale(G, 7777), G, n)), (E.p**42 - 1) // n, E.p))
 
 # print(E.scale(G, n))
 # print(E.scale(G, 10000))
