@@ -1,5 +1,3 @@
-/* To test this code using your tcp connection, first set SSLKEYLOGFILE environment variable to track your session keys, then use Wireshark to fetch packet data. */
-
 /*====================
     Misc Functions
 ====================*/
@@ -86,6 +84,7 @@ N256R1 = 0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551
 /*========================================
                 SSL TEST
 ========================================*/
+server_pub = 0xc5f1603edee701bda2562cd7b8928ed44bd6d9f24f6e256996e01e293e9f0f45
 
 
 
