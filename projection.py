@@ -1,3 +1,5 @@
+import random
+
 class Ell:
     def __init__(self, a, b, p):
         self.a = a
@@ -6,24 +8,46 @@ class Ell:
         if p % 4 == 3:
             self.p14 = (p+1)//4
 
+    """
+    Calculate a quardratic rasidue for given integer in F_p.
+    """
     def modsqrt(self, x):
         if p % 4 == 3:
             return math.pow(x, self.p14, self.p)
         else:
             raise NotImplementedError("Quadratic residue for this prime is not implemented")
 
+    """
+    Calculate modulo inverse for given integer in F_p.
+    """
     def modinv(self, x):
         return pow(x, self.p - 2, self.p)
 
+    """
+    Return if given coordinate is on the curve.
+    """
     def check(self, xyz):
         (x, y, z) = xyz
         return y**2*z % self.p == (x**3 + self.a*x*z**2 + self.b*z**3) % self.p
 
+    """
+    Return if p1 is equals to p2.
+    """
     def eq(self, p1, p2):
         (x1, y1, z1) = p1
         (x2, y2, z2) = p2
-        return (x1*z2 % self.p == x2*z1 % self.p) and (y1*z2 % self.p == y2*z1 % self.p)
+        return ((x1*z2 - x2*z1) % self.p == 0) and ((y1*z2 - y2*z1) % self.p == 0)
+    """
+    Return if p1 is inverse of p2.
+    """
+    def isInv(self, p1, p2):
+        (x1, y1, z1) = p1
+        (x2, y2, z2) = p2
+        return ((x1*z2 - x2*z1) % self.p == 0) and ((y1*z2 - y2*z1) % self.p != 0)
 
+    """
+    Double given point.
+    """
     def dbl(self, xyz):
         (x, y, z) = xyz
 
@@ -42,6 +66,9 @@ class Ell:
 
         return (x2, y2, s3)
 
+    """
+    Add given two points.
+    """
     def add(self, p1, p2):
         (x1, y1, z1) = p1
         (x2, y2, z2) = p2
@@ -55,7 +82,7 @@ class Ell:
         r = (y1 * z2 - y2 * z1)                         % self.p
         s = (x1 * z2 - x2 * z1)                         % self.p
 
-        if s == 0:
+        if s == 0 and r == 0:
             return self.dbl(p1)
 
         s2 = s**2                                       % self.p
@@ -67,6 +94,9 @@ class Ell:
 
         return (x3, y3, z3)
 
+    """
+    Scale given point by integer k.
+    """
     def scale(self, xyz, k):
         tmp = (0, 0, 0)
         while k != 0:
@@ -76,10 +106,79 @@ class Ell:
             xyz = self.dbl(xyz)
         return tmp
 
+    """
+    Convert given point to xy-coordinate.
+    (x, y, z) |-> (x / z, y / z)
+    """
     def toXY(self, xyz):
         x, y, z = xyz
         zinv = self.modinv(z)
         return (x*zinv % self.p, y*zinv % self.p)
+
+    """
+    Calculate the equation of tangent line of p, then substitute q to it.
+    """
+    def getTangentLine(self, p, q):
+        (x1, y1, z1) = p
+        (x2, y2, z2) = q
+
+        r = (3 * x1**2 + self.a * z1**2)
+        s = 2 * y1 * z1
+
+        return ((y2 * z1 * s - y1 * z2 * s + x1 * z2 * r - x2 * z1 * r) % self.p, z1 * z2 * s % self.p)
+
+    """
+    Calculate the equation of vertical line of p, then substitute q to it.
+    """
+    def getVerticalLine(self, p, q):
+        (x1, y1, z1) = p
+        (x2, y2, z2) = q
+        return ((x2 * z1 - x1 * z2) % self.p, z1 * z2 % self.p)
+
+    """
+    Calculate the equation of line between p and q, then substitute r to it.
+    """
+    def getLine(self, p, q, r):
+        (x1, y1, z1) = p
+        (x2, y2, z2) = q
+        (x3, y3, z3) = r
+
+        if self.eq(p, q):
+            return getTangentLine(p)
+
+        if self.isInv(p, q):
+            return getVerticalLine(p)
+
+        r = y2 - y1
+        s = x2 - x1
+        return ((y3 * z1 * s - y1 * z3 * s + x1 * z3 * r - x3 * z1 * r) % self.p, z1 * z3 * s % self.p)
+
+    """
+    Calculate Tate pairing using Miller's Algotithm
+    """
+    def tate(self, p, q, k):
+        f = 1
+        fz = 1
+        v = p
+        while k != 0:
+            (x, xz) = self.getTangentLine(v, q)
+            v = self.dbl(v)
+            (y, yz) = self.getVerticalLine(v, q)
+
+            f = (f**2 * x * yz) % self.p
+            fz = (fz**2 * xz * y) % self.p
+
+            if k & 1 == 1:
+                (x, xz) = self.getLine(v, p, q)
+                v = self.add(v, p)
+                (y, yz) = self.getVerticalLine(v, q)
+
+                f = (f * x * yz) % self.p
+                fz = (fz * xz * y) % self.p
+
+            k >>= 1
+
+        return (f, fz)
 
 E = Ell(0,7,2**256 - 0x1000003D1)
 G = (0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798, 0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8, 1)
@@ -90,5 +189,11 @@ print("Is 4G on the curve?:", E.check(E.dbl(E.dbl(G))))
 print("2G as xy-coordinate:", E.toXY(E.dbl(G)))
 print("4G as xy-coordinate:", E.toXY(E.dbl(E.dbl(G))))
 print("12345G as xy-coordinate:", E.toXY(E.scale(G, 12345)))
+print("10000G + 30000G == 40000G?:", E.eq(E.add(E.scale(G, 10000), E.scale(G, 30000)), E.scale(G, 40000)))
+print("Multiply by random 256-bit integer:", E.scale(G, random.randint(0, 2**256)))
+print("GetLine(P, Q, P):", E.scale(G, random.randint(0, 2**256)))
+print("GetLine(P, Q, P + Q):", E.scale(G, random.randint(0, 2**256)))
+print("Tate(100G, 10000G)", E.tate(E.scale(G, 100),  E.scale(G, 10000), n))
+
 # print(E.scale(G, n))
 # print(E.scale(G, 10000))
