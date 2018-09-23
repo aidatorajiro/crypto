@@ -157,8 +157,8 @@ class Ell:
         if self.isInv(p, q):
             return getVerticalLine(p)
 
-        r = y2 - y1
-        s = x2 - x1
+        r = (y1 * z2 - y2 * z1)                         % self.p
+        s = (x1 * z2 - x2 * z1)                         % self.p
         return ((y3 * z1 * s - y1 * z3 * s + x1 * z3 * r - x3 * z1 * r) % self.p, z1 * z3 * s % self.p)
 
     """
