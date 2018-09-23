@@ -152,10 +152,10 @@ class Ell:
         (x3, y3, z3) = r
 
         if z1 == 0:
-            return ((x2 * y3 - x3 * y2), x2 * z3 % self.p)
+            raise Error("err")
 
         if z2 == 0:
-            return ((x1 * y3 - x3 * y1), x1 * z3 % self.p)
+            raise Error("err")
 
         if self.eq(p, q):
             return self.getTangentLine(p, r)
@@ -216,8 +216,9 @@ print("GetLine(P, Q, Q):", E.getLine(G1, G3, G3))
 print("GetLine(P, Q, -(P + Q)):", E.getLine(G1, G3, E.inv(G4)))
 print("GetTangentLine(P, -2P):", E.getTangentLine(G1, E.inv(E.dbl(G1))))
 
-val = lambda x: x[0]*E.modinv(x[1])%E.p
-print("e(G, G)", E.tate(G, G, n))
-print("e(1000G, 7777G)", E.tate(E.scale(G, 1000), E.scale(G, 7777), n))
+val = lambda x: x[0]*E.modinv(x[1]) % E.p
+print("e(G, G)", E.tate(G, G, n - 1))
+print("e(1000G, G)", val(E.tate(E.scale(G, 1000), (0, 0, 0), n)))
+print("e(1000G, G)", val(E.tate(E.scale(G, 1000), (0, 0, 0), n)))
 # print(E.scale(G, n))
 # print(E.scale(G, 10000))
