@@ -173,24 +173,23 @@ class Ell:
     def tate(self, p, q, k):
         f = 1
         fz = 1
-        v = (0, 0, 0)
-        while k != 0:
-            if k & 1 == 1:
-                (x, xz) = self.getLine(v, p, q)
-                v = self.add(v, p)
-                (y, yz) = self.getVerticalLine(v, q)
+        v = p
 
-                f = (f * x * yz) % self.p
-                fz = (fz * xz * y) % self.p
-
-            k >>= 1
-
+        for i in format(k, "b")[1:]:
             (x, xz) = self.getTangentLine(v, q)
             v = self.dbl(v)
             (y, yz) = self.getVerticalLine(v, q)
 
             f = (f**2 * x * yz) % self.p
             fz = (fz**2 * xz * y) % self.p
+
+            if i == "1":
+                (x, xz) = self.getLine(v, p, q)
+                v = self.add(v, p)
+                (y, yz) = self.getVerticalLine(v, q)
+
+                f = (f * x * yz) % self.p
+                fz = (fz * xz * y) % self.p
 
         print(v)
 
