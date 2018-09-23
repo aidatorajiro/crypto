@@ -151,11 +151,17 @@ class Ell:
         (x2, y2, z2) = q
         (x3, y3, z3) = r
 
+        if z1 == 0:
+            return ((x2 * y3 - x3 * y2), x2 * z3 % self.p)
+
+        if z2 == 0:
+            return ((x1 * y3 - x3 * y1), x1 * z3 % self.p)
+
         if self.eq(p, q):
-            return getTangentLine(p)
+            return self.getTangentLine(p, r)
 
         if self.isInv(p, q):
-            return getVerticalLine(p)
+            return self.getVerticalLine(p, r)
 
         r = (y1 * z2 - y2 * z1)                         % self.p
         s = (x1 * z2 - x2 * z1)                         % self.p
@@ -167,15 +173,8 @@ class Ell:
     def tate(self, p, q, k):
         f = 1
         fz = 1
-        v = p
+        v = (0, 0, 0)
         while k != 0:
-            (x, xz) = self.getTangentLine(v, q)
-            v = self.dbl(v)
-            (y, yz) = self.getVerticalLine(v, q)
-
-            f = (f**2 * x * yz) % self.p
-            fz = (fz**2 * xz * y) % self.p
-
             if k & 1 == 1:
                 (x, xz) = self.getLine(v, p, q)
                 v = self.add(v, p)
@@ -185,6 +184,15 @@ class Ell:
                 fz = (fz * xz * y) % self.p
 
             k >>= 1
+
+            (x, xz) = self.getTangentLine(v, q)
+            v = self.dbl(v)
+            (y, yz) = self.getVerticalLine(v, q)
+
+            f = (f**2 * x * yz) % self.p
+            fz = (fz**2 * xz * y) % self.p
+
+        print(v)
 
         return (f, fz)
 
@@ -203,15 +211,17 @@ print("2G as xy-coordinate:", E.toXY(E.dbl(G)))
 print("4G as xy-coordinate:", E.toXY(E.dbl(E.dbl(G))))
 print("10000G as xy-coordinate:", E.toXY(G1))
 print("10000G + 30000G == 40000G?:", E.eq(E.add(G1, G3), G4))
+print("nG:", E.scale(G1, n))
 print("Multiply by random 256-bit integer:", E.scale(G, random.randint(0, 2**256)))
 print("isInv(P, inv(P)):", E.isInv(G3, E.inv(G3)))
 print("GetLine(P, Q, P):", E.getLine(G1, G3, G1))
 print("GetLine(P, Q, Q):", E.getLine(G1, G3, G3))
 print("GetLine(P, Q, -(P + Q)):", E.getLine(G1, G3, E.inv(G4)))
+print("GetTangentLine(P, -2P):", E.getTangentLine(G1, E.inv(E.dbl(G1))))
 
 val = lambda x: x[0]*E.modinv(x[1])%E.p
-print("e(G, 7777G)^(p^42 - 1)/n", pow(val(E.tate(G, E.scale(G, 7777), n)), (E.p**42 - 1) // n, E.p))
-print("e(7777G, G)^(p^42 - 1)/n", pow(val(E.tate(E.scale(G, 7777), G, n)), (E.p**42 - 1) // n, E.p))
-
+print("e(G, G)", E.tate(G, G, n))
+print("e(1000G, 7777G)", val(E.tate(E.scale(G, 1000), E.scale(G, 7777), n)))
+print("e(10G, 1111G)^700", pow(val(E.tate(E.scale(G, 10), E.scale(G, 1111), n)), 700, E.p))
 # print(E.scale(G, n))
 # print(E.scale(G, 10000))
