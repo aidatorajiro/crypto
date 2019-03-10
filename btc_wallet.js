@@ -4,7 +4,7 @@ const readlineSync = require('readline-sync');
 var mnemonic = readlineSync.question("Mnemonic: ")
 var derivation = readlineSync.question("Derivation Path (like m/44'/0'/0'/0/0): ")
 
-let network = "mainnet"; // mainnet | testnet | regtest
+let network = "regtest"; // mainnet | testnet | regtest
 let encodeType = "bech32"; // base64 | bech32
 let purpose = "p2wpkh"; // p2pkh | p2wpkh-nested-in-p2sh | p2wpkh; if encodeType == bech32, MUST BE p2wpkh. if encodeType == base64, MUST BE either p2pkh or p2wpkh-nested-in-p2sh. p2pkh -> 20 byte key hash, p2wpkh-nested-in-p2sh -> 20 byte script hash (hash of 0014<20 byte key hash>), p2wpkh -> 20 byte key hash.
 
