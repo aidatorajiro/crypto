@@ -1,8 +1,5 @@
 import hashlib
 
-def I2OSP(a, n):
-    
-
 def bytexor(a, b):
     return (int.from_bytes(a, 'little') ^ int.from_bytes(b, 'little')).to_bytes(max(len(a), len(b)), 'little')
 
