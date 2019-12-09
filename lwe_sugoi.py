@@ -1,4 +1,5 @@
-# from https://en.wikipedia.org/wiki/Learning_with_errors#Public-key_cryptosystem
+# https://en.wikipedia.org/wiki/Learning_with_errors#Public-key_cryptosystem
+# Oded Regev, “On lattices, learning with errors, random linear codes, and cryptography,” in Proceedings of the thirty-seventh annual ACM symposium on Theory of computing (Baltimore, MD, USA: ACM, 2005), 84–93
 
 import math
 import random
