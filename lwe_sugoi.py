@@ -79,6 +79,10 @@ for i in range(samples):
     enc = encryption(bit, m, a, b, p)
     dec = decryption(enc, s, p)
 
+    print("bit: " + str(bit))
+    print("sum of a: " + str(sum(enc[0])))
+    print("b: " + str(enc[1]))
+
     if bit == dec:
         print("ok")
     else:
