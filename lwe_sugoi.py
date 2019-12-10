@@ -41,7 +41,6 @@ def genconsts(n = 128):
     
     theta_quad = lambda i: quad(theta, [(i-0.5)/p, (i+0.5)/p]) if theta(i/p) > 1e-10 else 0
 
-    mp.dps = 6
     print("Generating distribution....")
     x_dist = []
     for i in range(p):
