@@ -4,6 +4,7 @@
 import math
 import random
 from functools import reduce
+from mpmath import jtheta, quad
 
 def prime(a):
     flags = [True] * (a + 1)
@@ -28,20 +29,28 @@ def add_vectors(matrix, p):
     return reduce(lambda x, y: add(x, y, p), matrix, [0] * len(matrix[0]))
 
 ### consts
-def genconsts(n = 128):
+def genconsts(n = 64):
     p = random.choice(list(filter(lambda x: x >= n*n, prime(2*n*n))))
     #eps = (3.45678910111213141516)
     #m = (1 + eps)*(n + 1)*math.log(p)
     m = 5*n
+
     alp = lambda n: 1/(math.sqrt(n)*math.log(n))
-    x = lambda: int(random.normalvariate(0, 10000*alp(n)/math.sqrt(2*math.pi))) # TODO
+    
+    theta = lambda r: jtheta(3, -math.pi*r, math.exp(-alp(n)*alp(n)*math.pi))
+    
+    theta_quad = lambda i: quad(theta, [(i-0.5)/p, (i+0.5)/p])
+
+    x_dist = [theta_quad(i) for i in range(p)]
+    
+    x = lambda: random.choices(range(p), x_dist)[0]
 
     ### priv key
     s = [random.randint(0, p - 1) for i in range(n)]
 
     ### public key
     a = [[random.randint(0, p - 1) for i in range(n)] for i in range(m)]
-    e = [x() for i in range(m)]
+    e = [x() for i in range(m)] # will be equivalent to random.choices(list(range(p)), weights=x_dist, k=m)
     b = [(dot(a[i], s, p) + e[i]) % p for i in range(m)]
 
     return (m, a, b, p, s)
