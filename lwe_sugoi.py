@@ -39,14 +39,27 @@ def genconsts(n = 128):
     
     theta = lambda r: jtheta(3, -math.pi*r, math.exp(-alp(n)*alp(n)*math.pi))
     
-    theta_quad = lambda i: quad(theta, [(i-0.5)/p, (i+0.5)/p]) if theta(i/p) > 1e-10 else 0
-
+    theta_quad = lambda i: quad(theta, [(i-0.5)/p, (i+0.5)/p])
+    
     print("Generating distribution....")
     x_dist = []
-    for i in range(p):
+    i = 0
+    while True:
         if i % (p // 100) == 0:
             print("%s/%s" % (i, p - 1))
-        x_dist.append(theta_quad(i))
+        
+        quad_result = theta_quad(i)
+        
+        x_dist.append(quad_result)
+
+        if quad_result < 1e-10:
+            break
+
+        i += 1
+    
+    print("%s/%s" % (p - 1, p - 1))
+    
+    x_dist = x_dist + [0]*(p - 2*len(x_dist) + 1) + list(reversed(x_dist[1::]))
 
     ### priv key
     s = [random.randint(0, p - 1) for i in range(n)]
