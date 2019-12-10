@@ -29,7 +29,7 @@ def add_vectors(matrix, p):
     return reduce(lambda x, y: add(x, y, p), matrix, [0] * len(matrix[0]))
 
 ### consts
-def genconsts(n = 64):
+def genconsts(n = 128):
     p = random.choice(list(filter(lambda x: x >= n*n, prime(2*n*n))))
     #eps = (3.45678910111213141516)
     #m = (1 + eps)*(n + 1)*math.log(p)
@@ -45,17 +45,16 @@ def genconsts(n = 64):
     print("Generating distribution....")
     x_dist = []
     for i in range(p):
-        print(str(i) + "/" + str(p))
+        if i % (p // 100) == 0:
+            print(str(i) + "/" + str(p - 1))
         x_dist.append(theta_quad(i))
-    
-    x = lambda: random.choices(range(p), x_dist)[0]
 
     ### priv key
     s = [random.randint(0, p - 1) for i in range(n)]
 
     ### public key
     a = [[random.randint(0, p - 1) for i in range(n)] for i in range(m)]
-    e = [x() for i in range(m)] # will be equivalent to random.choices(list(range(p)), weights=x_dist, k=m)
+    e = random.choices(list(range(p)), weights=x_dist, k=m)
     b = [(dot(a[i], s, p) + e[i]) % p for i in range(m)]
 
     return (m, a, b, p, s)
