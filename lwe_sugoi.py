@@ -18,14 +18,14 @@ def prime(a):
             lst.append(i)
     return lst
 
-def dot(x, y):
-    return sum(map(lambda x: x[0]*x[1], zip(x, y)))
+def dot(x, y, p):
+    return sum(map(lambda x: x[0]*x[1], zip(x, y))) % p
 
-def add(x, y):
-    return [x[i] + y[i] for i in range(len(x))]
+def add(x, y, p):
+    return [(x[i] + y[i]) % p for i in range(len(x))]
 
-def add_vectors(matrix):
-    return reduce(add, matrix, [0] * len(matrix[0]))
+def add_vectors(matrix, p):
+    return reduce(lambda x, y: add(x, y, p), matrix, [0] * len(matrix[0]))
 
 ### consts
 def genconsts(n = 128):
@@ -42,20 +42,20 @@ def genconsts(n = 128):
     ### public key
     a = [[random.randint(0, p - 1) for i in range(n)] for i in range(m)]
     e = [x() for i in range(m)]
-    b = [dot(a[i], s) + e[i] for i in range(m)]
+    b = [(dot(a[i], s, p) + e[i]) % p for i in range(m)]
 
     return (m, a, b, p, s)
 
 ### encryption
 def encryption(bit, m, a, b, p):
-    S = list(filter(lambda x: random.random() < 0.5, range(m)))
+    S = list(filter(lambda x: random.randint(0, 1) == 0, range(m)))
 
     if bit == 0:
-        enc_a = add_vectors([a[i] for i in S])
-        enc_b = sum([b[i] for i in S])
+        enc_a = add_vectors([a[i] for i in S], p)
+        enc_b = sum([b[i] for i in S]) % p
     else:
-        enc_a = add_vectors([a[i] for i in S])
-        enc_b = (p // 2) + sum([b[i] for i in S])
+        enc_a = add_vectors([a[i] for i in S], p)
+        enc_b = ((p // 2) + sum([b[i] for i in S])) % p
 
     enc = (enc_a, enc_b)
 
@@ -64,7 +64,10 @@ def encryption(bit, m, a, b, p):
 ### decryption
 
 def decryption(enc, s, p):
-    if enc[1] - dot(enc[0], s) < p//2:
+    value = (enc[1] - dot(enc[0], s, p)) % p
+    distance_zero = min(value, p - value)
+    distance_half = abs(value - p//2)
+    if distance_zero < distance_half:
         dec = 0
     else:
         dec = 1
@@ -79,10 +82,6 @@ for i in range(samples):
     bit = random.randint(0, 1)
     enc = encryption(bit, m, a, b, p)
     dec = decryption(enc, s, p)
-
-    print("bit: " + str(bit))
-    print("sum of a: " + str(sum(enc[0])))
-    print("b: " + str(enc[1]))
 
     if bit == dec:
         print("ok")
