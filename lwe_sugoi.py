@@ -34,7 +34,7 @@ def genconsts(n = 128):
     #m = (1 + eps)*(n + 1)*math.log(p)
     m = 5*n
     alp = lambda n: 1/(math.sqrt(n)*math.log(n))
-    x = lambda: int(random.normalvariate(0, alp(n)/math.sqrt(2*math.pi)))
+    x = lambda: int(random.normalvariate(0, 10000*alp(n)/math.sqrt(2*math.pi))) # TODO
 
     ### priv key
     s = [random.randint(0, p - 1) for i in range(n)]
@@ -87,4 +87,3 @@ for i in range(samples):
         print("ok")
     else:
         print("error")
-    
