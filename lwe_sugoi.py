@@ -45,7 +45,7 @@ def genconsts(n = 128):
     x_dist = []
     for i in range(p):
         if i % (p // 100) == 0:
-            print(str(i) + "/" + str(p - 1))
+            print("%s/%s" % (i, p - 1))
         x_dist.append(theta_quad(i))
 
     ### priv key
@@ -89,6 +89,12 @@ def decryption(enc, s, p):
 ### some test ...
 
 (m, a, b, p, s) = genconsts()
+print("key length: %s" % m)
+print("public key a: %s" % a)
+print("public key b: %s" % b)
+print("modulo: %s" % p)
+print("secret key: %s" % s)
+
 samples = 100
 for i in range(samples):
     bit = random.randint(0, 1)
