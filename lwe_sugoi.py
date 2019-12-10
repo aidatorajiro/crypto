@@ -4,7 +4,7 @@
 import math
 import random
 from functools import reduce
-from mpmath import jtheta, quad
+from mpmath import jtheta, quad, mp
 
 def prime(a):
     flags = [True] * (a + 1)
@@ -39,9 +39,14 @@ def genconsts(n = 64):
     
     theta = lambda r: jtheta(3, -math.pi*r, math.exp(-alp(n)*alp(n)*math.pi))
     
-    theta_quad = lambda i: quad(theta, [(i-0.5)/p, (i+0.5)/p])
+    theta_quad = lambda i: quad(theta, [(i-0.5)/p, (i+0.5)/p]) if theta(i/p) > 1e-10 else 0
 
-    x_dist = [theta_quad(i) for i in range(p)]
+    mp.dps = 6
+    print("Generating distribution....")
+    x_dist = []
+    for i in range(p):
+        print(str(i) + "/" + str(p))
+        x_dist.append(theta_quad(i))
     
     x = lambda: random.choices(range(p), x_dist)[0]
 
