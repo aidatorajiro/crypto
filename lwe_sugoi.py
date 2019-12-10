@@ -108,13 +108,18 @@ print("public key b: %s" % b)
 print("modulo: %s" % p)
 print("secret key: %s" % s)
 
-samples = 100
+samples = 1000
+ok = 0
+error = 0
 for i in range(samples):
     bit = random.randint(0, 1)
     enc = encryption(bit, m, a, b, p)
     dec = decryption(enc, s, p)
 
     if bit == dec:
-        print("ok")
+        ok += 1
     else:
-        print("error")
+        error += 1
+
+print("ok: %s/%s" % (ok, samples))
+print("error: %s/%s" % (error, samples))
