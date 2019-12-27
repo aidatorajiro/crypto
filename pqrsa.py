@@ -30,7 +30,7 @@ random.seed(114514) # master key
 while count < 1024:
     kazu = random.randint(2**1022, 2**1023 - 1)
     prm = kazu*2 + 1
-#   stat = random.getstate()
+#   stat = random.getstate() # if you want to use pure python impl...
 #   if is_prime(prm):
 #       random.setstate(stat)
     if gmpy2.is_prime(prm):
