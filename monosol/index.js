@@ -1,7 +1,7 @@
 var app = new Vue({
     el: '#app',
     data: {
-        stage: 'stage3',
+        stage: 'stage1',
         character_presets: {
             "English": "etaoinshrdluwmfcgypbkvjxqz",
             "Romaji": "aiounetksryhmwdgzbpfvq"
