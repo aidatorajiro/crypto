@@ -18,7 +18,7 @@ var app = new Vue({
         decryption_table_x_pos: 0,
         decryption_table_item_width: 30
     },
-    compute: {
+    computed: {
         table_hash: function () {
             let hash = {}
             for (let i = 0; i < app.decryption_table.length; i++) {
