@@ -1,0 +1,88 @@
+<html>
+  <head>
+    <title>monoalphabetic substitution solverr</title>
+    <style>
+      #app {
+        display: none;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .table {
+        white-space: nowrap;
+      }
+      .table_item {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        vertical-align: middle;
+        display: inline-block;
+        text-align: center;
+      }
+      .table > div {
+        height: 30px;
+      }
+      .char1 {
+      }
+      .char2 {
+      }
+      .left {
+        background-color: red;
+      }
+      .right {
+        background-color: blue;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" v-on:mouseup="rearrange = false" v-on:mousemove="change_mouse_pos">
+      <h1>monoalphabetic substitution solverr</h1>
+      <div id="stage1" v-if="stage == 'stage1'">
+        <div class="description">
+          <h2>Stage 1 - Provide character set</h2>
+          Please provide all characters that appear in ciphertext and plaintext.<br>
+          It is recommended that the characters are sorted according to the frequency (higher frequency left, lower frequency right).
+        </div>
+        <div class="cipher">
+          <h3>Ciphertext Characters</h3>
+          <input type="text" style="width: 100%" v-model="charset_cipher"/><br>
+        </div>
+        <div class="plain">
+          <h3>Plaintext Characters</h3>
+          <input type="text" style="width: 100%" v-model="charset_plain"/>
+          <div class="presets">
+            Presets: <button v-for="(chars, id) in character_presets" v-on:click="charset_plain = chars">{{id}}</button>
+          </div>
+        </div>
+        <button v-on:click="next_stage()">OK</button>
+      </div>
+      <div id="stage2" v-if="stage == 'stage2'">
+        <h2>Stage 2 - Provide ciphertext</h2>
+        Please provide ciphertext. <br>
+        <textarea style="width: 100%; height: 400px;" v-model="ciphertext"></textarea><br>
+        <button v-on:click="next_stage()">OK</button>
+      </div>
+      <div id="stage3" v-if="stage == 'stage3'">
+        <h2>Stage 3 - Have fun!</h2>
+        Rearrange, modify or expand the decryption table.<br>
+        <div class="table">
+          <div>
+            <div v-for="tuple in decryption_table" class="table_item char1">{{tuple[0]}}</div>
+          </div>
+          <div>
+            <div v-for="tuple in decryption_table" class="table_item arrow">↓</div>
+          </div>
+          <div v-if="!rearrange">
+            <div v-for="(tuple, id) in decryption_table" class="table_item char2" v-on:mousedown="rearrange = true; rearrange_old_id = id; rearrange_new_id = id;">{{tuple[1]}}</div>
+          </div>
+          <div v-if="rearrange">
+            <div v-for="(tuple, id) in decryption_table" v-bind:class="{right: id &gt; rearrange_new_id, left: id &lt; rearrange_new_id, table_item: true, char2: true}">{{tuple[1]}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="index.js"></script>
+  </body>
+</html>
