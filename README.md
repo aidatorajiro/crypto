@@ -11,6 +11,8 @@ NestedSign.sol - ECDSA verifier in Solidity.
 EC.sol - Elliptic Curve compution in Solidity.  
 lwe_sugoi.py - Learning with error cryptosystem in python (requires library mpmath).
 <http://aidatorajiro.github.io/crypto/monosol> - Monoalphabetic substitution solver using Vue.js
+pqrsa.py - fullscratch Post-Quantum RSA (multi prime RSA)
+tls13.py - fullscratch TLS 1.3
 
 # todo list
 fullscratch_zcash - fullscratch zcash signer/verifier in python.  
