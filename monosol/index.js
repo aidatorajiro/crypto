@@ -84,7 +84,7 @@ var app = new Vue({
                     break;
                 case 'stage2':
                     this.stage = 'stage3'
-                    app.make_decryption_table()
+                    this.make_decryption_table()
                     break;
             }
         },
