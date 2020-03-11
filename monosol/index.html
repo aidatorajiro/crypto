@@ -1,7 +1,15 @@
 <html>
   <head>
+    <meta charset="utf-8">
     <title>monoalphabetic substitution solverr</title>
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      h1, h2, h3, .description {
+        padding: 10px;
+      }
       #app {
         display: none;
         margin: 0;
@@ -11,6 +19,8 @@
       }
       .table {
         white-space: nowrap;
+        user-select: none;
+        -webkit-user-select: none;
       }
       .table_item {
         width: 30px;
@@ -26,17 +36,25 @@
       .char1 {
       }
       .char2 {
+        position: relative;
+        left: 0px;
+        top: 0px;
+        transition: .3s;
+        user-select: none;
       }
-      .left {
-        background-color: red;
+      .to_left {
+        left: -30px;
       }
-      .right {
-        background-color: blue;
+      .to_right {
+        left: 30px;
+      }
+      .picked {
+        background-color: #EEEEEE80;
       }
     </style>
   </head>
   <body>
-    <div id="app" v-on:mouseup="rearrange = false" v-on:mousemove="change_mouse_pos">
+    <div id="app" v-on:mouseup="disable_rearrange_mode" v-on:mousemove="change_mouse_pos">
       <h1>monoalphabetic substitution solverr</h1>
       <div id="stage1" v-if="stage == 'stage1'">
         <div class="description">
@@ -58,14 +76,18 @@
         <button v-on:click="next_stage()">OK</button>
       </div>
       <div id="stage2" v-if="stage == 'stage2'">
-        <h2>Stage 2 - Provide ciphertext</h2>
-        Please provide ciphertext. <br>
+        <div class="description">
+          <h2>Stage 2 - Provide ciphertext</h2>
+          Please provide ciphertext. <br>
+        </div>
         <textarea style="width: 100%; height: 400px;" v-model="ciphertext"></textarea><br>
         <button v-on:click="next_stage()">OK</button>
       </div>
       <div id="stage3" v-if="stage == 'stage3'">
-        <h2>Stage 3 - Have fun!</h2>
-        Rearrange, modify or expand the decryption table.<br>
+        <div class="description">
+          <h2>Stage 3 - Have fun!</h2>
+          Rearrange, modify or expand the decryption table.<br>
+        </div>
         <div class="table">
           <div>
             <div v-for="tuple in decryption_table" class="table_item char1">{{tuple[0]}}</div>
@@ -73,11 +95,23 @@
           <div>
             <div v-for="tuple in decryption_table" class="table_item arrow">↓</div>
           </div>
-          <div v-if="!rearrange">
-            <div v-for="(tuple, id) in decryption_table" class="table_item char2" v-on:mousedown="rearrange = true; rearrange_old_id = id; rearrange_new_id = id;">{{tuple[1]}}</div>
+          <div v-if="!rearrange" v-bind:key="'(^_^)ohayou'">
+            <div v-for="(tuple, id) in decryption_table" class="table_item char2" v-on:mousedown="enable_rearrange_mode(id)">{{tuple[1]}}</div>
           </div>
-          <div v-if="rearrange">
-            <div v-for="(tuple, id) in decryption_table" v-bind:class="{right: id &gt; rearrange_new_id, left: id &lt; rearrange_new_id, table_item: true, char2: true}">{{tuple[1]}}</div>
+          <div v-if="rearrange" v-bind:key="'konnichiwa[!_!]'">
+            <div v-for="(tuple, id) in decryption_table"
+                 v-bind:class="{
+                  to_right: rearrange_new_id &lt; rearrange_old_id &&
+                         rearrange_new_id &lt;= id && id &lt; rearrange_old_id, 
+                  to_left: rearrange_old_id &lt; rearrange_new_id &&
+                        rearrange_old_id &lt; id && id &lt;=rearrange_new_id,
+                  table_item: true,
+                  char2: true,
+                  picked: id == rearrange_old_id
+                }"
+                v-bind:style="{
+                  left: id == rearrange_old_id ? (rearrange_new_id - rearrange_old_id)*decryption_table_item_width : undefined
+                }">{{tuple[1]}}</div>
           </div>
         </div>
       </div>

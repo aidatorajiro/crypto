@@ -10,19 +10,59 @@ var app = new Vue({
         charset_plain: "",
         decryption_table: [],
         ciphertext: "",
+        plaintext: "",
         rearrange: false,
         rearrange_old_id: undefined,
         rearrange_new_id: undefined,
-        mousepos: []
+        mousepos: undefined,
+        decryption_table_x_pos: 0,
+        decryption_table_item_width: 30
+    },
+    compute: {
+        table_hash: function () {
+            let hash = {}
+            for (let i = 0; i < app.decryption_table.length; i++) {
+                hash[app.decryption_table[i][0]] = app.decryption_table[i][1]
+            }
+            return hash
+        }
     },
     watch: {
-        mousepos: function () {
-            
+        mousepos: function (val) {
+            app.rearrange_new_id = Math.floor((val[0] - app.decryption_table_x_pos) / app.decryption_table_item_width)
+        },
+        decryption_table: function () {
+            app.plaintext = ""
         }
     },
     methods: {
+        enable_rearrange_mode: function (id) {
+            app.rearrange = true
+            app.rearrange_old_id = id
+            app.rearrange_new_id = id
+        },
+        disable_rearrange_mode: function () {
+            app.rearrange = false
+            let oldi = app.rearrange_old_id;
+            let newi = app.rearrange_new_id;
+            let table = app.decryption_table;
+            if (newi < oldi) {
+                let tmp = table[oldi][1]
+                for (let i = 0; i < oldi - newi; i++) {
+                    table[oldi - i][1] = table[oldi - i - 1][1]
+                }
+                table[newi][1] = tmp
+            }
+            if (oldi < newi) {
+                let tmp = table[oldi][1]
+                for (let i = 0; i < newi - oldi; i++) {
+                    table[oldi + i][1] = table[oldi + i + 1][1]
+                }
+                table[newi][1] = tmp
+            }
+        },
         change_mouse_pos: function (ev) {
-            mousepos = [ev.clientX, ev.clientY]
+            app.mousepos = [ev.clientX, ev.clientY]
         },
         next_stage: function () {
             switch (app.stage) {
@@ -37,7 +77,7 @@ var app = new Vue({
         },
         make_decryption_table: function () {
             for (let i = 0; i < app.charset_cipher.length; i++) {
-                app.decryption_table.push([app.charset_cipher[i], app.charset_plain[i] || " "])
+                app.decryption_table.push([app.charset_cipher[i], app.charset_plain[i] || ' '])
             }
         }
     }
