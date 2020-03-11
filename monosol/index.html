@@ -54,7 +54,7 @@
     </style>
   </head>
   <body>
-    <div id="app" v-on:mouseup="disable_rearrange_mode" v-on:mousemove="change_mouse_pos">
+    <div id="app" v-on:mouseup="if (rearrange) { disable_rearrange_mode() }" v-on:mousemove="change_mouse_pos">
       <h1>monoalphabetic substitution solverr</h1>
       <div id="stage1" v-if="stage == 'stage1'">
         <div class="description">
@@ -113,8 +113,8 @@
                   left: id == rearrange_old_id ? (rearrange_new_id - rearrange_old_id)*decryption_table_item_width : undefined
                 }">{{tuple[1]}}</div>
           </div>
-          <pre>{{plaintext}}</pre>
         </div>
+        <pre>{{plaintext}}</pre>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
