@@ -208,6 +208,6 @@ print(E.valid(P))
 print(E.valid(X))
 print(E.valid(Y))
 print(E.valid(Z))
-l = 2
-m = (p**50 - 1) // l
-print((E.miller(X, Y, l)**m)*(E.miller(P, Z, l)**m) == 1)
+l = 10000
+print(E.miller(X, Y, l))
+print(E.miller(Y, X, l))
