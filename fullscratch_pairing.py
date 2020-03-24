@@ -168,46 +168,44 @@ class Curve:
         return result
 
     def miller(self, P, Q, l):
-        def g(P1, P2, P3):
+        def g(P1, P2):
             if self.inv(P1) == P2:
-                return P3.x - P1.x
+                return Q.x - P1.x
             if P1 == P2:
                 lam = (3*P1.x + self.a)/(2*P1.y)
             else:
                 lam = (P2.y - P1.y)/(P2.x - P1.x)
-            return P3.y - lam*(P3.x - P1.x) - P1.y
+            return Q.y - lam*(Q.x - P1.x) - P1.y
         f = 1
         V = P
         bs = format(l, 'b')[1:]
         for i in bs:
             V_dbl = self.add(V, V)
-            f = (f*f*g(V, V, Q))/(g(V_dbl, self.inv(V_dbl), Q))
+            f = (f*f*g(V, V))/(g(V_dbl, self.inv(V_dbl)))
             V = V_dbl
             if i == '1':
-                f = f*(g(V, P, Q))/(g(self.add(V, P), self.inv(self.add(V, P)), Q))
+                f = f*(g(V, P))/(g(self.add(V, P), self.inv(self.add(V, P))))
                 V = self.add(V, P)
         assert V == self.mul(P, l)
         return f
 
-p = 0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47
+if __name__ == "__main__":
+    p = 0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47
 
-E = Curve(Complex(Mod(0, p), Mod(0, p)), 3/Complex(Mod(9, p), Mod(1, p)))
-P = Point(
+    E1 = Curve(Complex(Mod(0, p), Mod(0, p)), Complex(Mod(3, p), Mod(0, p)))
+    P1 = Point(Complex(Mod(1, p), Mod(0, p)), Complex(Mod(2, p), Mod(0, p)))
+
+    E2 = Curve(Complex(Mod(0, p), Mod(0, p)), 3/Complex(Mod(9, p), Mod(1, p)))
+    P2 = Point(
         Complex(
             Mod(0x1800deef121f1e76426a00665e5c4479674322d4f75edadd46debd5cd992f6ed, p),
             Mod(0x198e9393920d483a7260bfb731fb5d25f1aa493335a9e71297e485b7aef312c2, p)),
         Complex(
             Mod(0x12c85ea5db8c6deb4aab71808dcb408fe3d1e7690c43d37b4ce6cc0166fa7daa, p), 
             Mod(0x090689d0585ff075ec9e99ad690c3395bc4b313370b38ef355acdadcd122975b, p)))
+    
+    X = E1.mul(P1, 10000)
+    Y = E2.mul(P2, 50000)
 
-X = E.mul(P, 10000)
-Y = E.mul(P, 50000)
-Z = E.mul(P, 50000*10000)
-
-print(E.valid(P))
-print(E.valid(X))
-print(E.valid(Y))
-print(E.valid(Z))
-l = 10000
-print(E.miller(X, Y, l))
-print(E.miller(Y, X, l))
+    print(E2.miller(Y, X, 11111))
+    print(E1.miller(X, Y, 11111))
