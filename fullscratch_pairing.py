@@ -202,8 +202,10 @@ P = Point(
 
 X = E.mul(P, 10000)
 Y = E.mul(P, 50000)
+Z = E.mul(P, 50000*10000)
 
 print(E.valid(P))
 print(E.valid(X))
 print(E.valid(Y))
-print(E.miller(X, Y, 100000))
+print(E.miller(X, Y, 1234567))
+print(E.miller(Z, P, 1234567))
