@@ -182,7 +182,7 @@ class Curve:
         for i in bs:
             V_dbl = self.add(V, V)
             f = (f*f*g(V, V, Q))/(g(V_dbl, self.inv(V_dbl), Q))
-            V = self.add(V, V)
+            V = V_dbl
             if i == '1':
                 f = f*(g(V, P, Q))/(g(self.add(V, P), self.inv(self.add(V, P)), Q))
                 V = self.add(V, P)
@@ -207,5 +207,7 @@ Z = E.mul(P, 50000*10000)
 print(E.valid(P))
 print(E.valid(X))
 print(E.valid(Y))
-print(E.miller(X, Y, 1234567))
-print(E.miller(Z, P, 1234567))
+print(E.valid(Z))
+l = 2
+m = (p**50 - 1) // l
+print((E.miller(X, Y, l)**m)*(E.miller(P, Z, l)**m) == 1)
