@@ -54,7 +54,7 @@
     </style>
   </head>
   <body>
-    <div id="app" v-on:mouseup="if (rearrange) { disable_rearrange_mode() }" v-on:mousemove="change_mouse_pos">
+    <div id="app" v-on:mouseup="if(rearrange){disable_rearrange_mode()}" v-on:mousemove="change_mouse_pos">
       <h1>monoalphabetic substitution solverr</h1>
       <div id="stage1" v-if="stage == 'stage1'">
         <div class="description">
@@ -117,7 +117,8 @@
         <pre>{{plaintext}}</pre>
       </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="vue.js"></script>
     <script src="index.js"></script>
+    <script src="preset.js"></script>
   </body>
 </html>
