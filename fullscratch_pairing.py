@@ -181,12 +181,16 @@ class Curve:
         bs = format(l, 'b')[1:]
         for i in bs:
             V_dbl = self.add(V, V)
-            f = (f*f*g(V, V))/(g(V_dbl, self.inv(V_dbl)))
+            if V_dbl != 'Origin':
+                f = (f*f*g(V, V))/(g(V_dbl, self.inv(V_dbl)))
             V = V_dbl
             if i == '1':
-                f = f*(g(V, P))/(g(self.add(V, P), self.inv(self.add(V, P))))
-                V = self.add(V, P)
+                V_add = self.add(V, P)
+                if V_add != 'Origin':
+                    f = f*(g(V, P))/(g(V_add, self.inv(V_add)))
+                V = V_add
         assert V == self.mul(P, l)
+        assert V == 'Origin'
         return f
 
 if __name__ == "__main__":
@@ -207,5 +211,19 @@ if __name__ == "__main__":
     X = E1.mul(P1, 10000)
     Y = E2.mul(P2, 50000)
 
-    print(E2.miller(Y, X, 11111))
-    print(E1.miller(X, Y, 11111))
+    Z = E1.mul(P1, 1000)
+    W = E2.mul(P2, 500000)
+
+    # order
+    l = 21888242871839275222246405745257275088548364400416034343698204186575808495617
+
+    # check same order
+    print(E1.mul(P1, l))
+    print(E2.mul(P2, l))
+
+    print(E2.miller(Y, X, l))
+    
+    #e = lambda X, Y: E1.miller(X, Y, l)/E2.miller(Y, X, l)
+
+    #print(e(X, Y))
+    #print(e(Z, W))
