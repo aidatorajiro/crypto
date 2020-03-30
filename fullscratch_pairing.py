@@ -207,12 +207,9 @@ if __name__ == "__main__":
         Complex(
             Mod(0x12c85ea5db8c6deb4aab71808dcb408fe3d1e7690c43d37b4ce6cc0166fa7daa, p), 
             Mod(0x090689d0585ff075ec9e99ad690c3395bc4b313370b38ef355acdadcd122975b, p)))
-    
+
     X = E1.mul(P1, 10000)
     Y = E2.mul(P2, 50000)
-
-    Z = E1.mul(P1, 1000)
-    W = E2.mul(P2, 500000)
 
     # order
     l = 21888242871839275222246405745257275088548364400416034343698204186575808495617
@@ -221,9 +218,14 @@ if __name__ == "__main__":
     print(E1.mul(P1, l))
     print(E2.mul(P2, l))
 
-    print(E2.miller(Y, X, l))
-    
-    #e = lambda X, Y: E1.miller(X, Y, l)/E2.miller(Y, X, l)
+    #print(E2.miller(Y, X, l))
+
+    w = lambda X, Y: E1.miller(X, Y, l)/E2.miller(Y, X, l)
+
+    print(w(X, Y))
+    #print(w(P1, P2)**(10000*50000))
+
+    #print(w(E1.mul(P1, 1), E2.mul(P2, 1)))
 
     #print(e(X, Y))
     #print(e(Z, W))
