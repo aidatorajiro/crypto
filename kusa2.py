@@ -115,43 +115,38 @@ import numpy as np
 import random
 from numpy.lib.twodim_base import vander
 
-# https://stackoverflow.com/questions/32114054/matrix-inversion-without-numpy very simple invert func
-def transposeMatrix(m):
-    return list(map(list,zip(*m)))
-
-def getMatrixMinor(m,i,j):
-    return [row[:j] + row[j+1:] for row in (m[:i]+m[i+1:])]
-
-def getMatrixDeternminant(m):
-    #base case for 2x2 matrix
-    if len(m) == 2:
-        return m[0][0]*m[1][1]-m[0][1]*m[1][0]
-
-    determinant = 0
-    for c in range(len(m)):
-        determinant += ((-1)**c)*m[0][c]*getMatrixDeternminant(getMatrixMinor(m,0,c))
-    return determinant
-
-def getMatrixInverse(m):
-    determinant = getMatrixDeternminant(m)
-    #special case for 2x2 matrix:
-    if len(m) == 2:
-        return [[m[1][1]/determinant, -1*m[0][1]/determinant],
-                [-1*m[1][0]/determinant, m[0][0]/determinant]]
-
-    #find matrix of cofactors
-    cofactors = []
-    for r in range(len(m)):
-        cofactorRow = []
-        for c in range(len(m)):
-            minor = getMatrixMinor(m,r,c)
-            cofactorRow.append(((-1)**(r+c)) * getMatrixDeternminant(minor))
-        cofactors.append(cofactorRow)
-    cofactors = transposeMatrix(cofactors)
-    for r in range(len(cofactors)):
-        for c in range(len(cofactors)):
-            cofactors[r][c] = cofactors[r][c]/determinant
-    return cofactors
+# based on https://integratedmlai.com/matrixinverse/
+def invert_matrix(A, tol=None):
+    """
+    Returns the inverse of the passed in matrix.
+        :param A: The matrix to be inversed
+ 
+        :return: The inverse of the matrix A
+    """
+ 
+    # Section 2: Make copies of A & I, AM & IM, to use for row ops
+    n = len(A)
+    AM = A.copy()
+    IM = np.identity(n, dtype=object)
+ 
+    # Section 3: Perform row operations
+    indices = list(range(n)) # to allow flexible row referencing ***
+    for fd in range(n): # fd stands for focus diagonal
+        fdScaler = 1 / AM[fd][fd]
+        # FIRST: scale fd row with fd inverse. 
+        for j in range(n): # Use j to indicate column looping.
+            AM[fd][j] *= fdScaler
+            IM[fd][j] *= fdScaler
+        # SECOND: operate on all rows except fd row as follows:
+        for i in indices[0:fd] + indices[fd+1:]: 
+            # *** skip row with fd in it.
+            crScaler = AM[i][fd] # cr stands for "current row".
+            for j in range(n): 
+                # cr - crScaler * fdRow, but one element at a time.
+                AM[i][j] = AM[i][j] - crScaler * AM[fd][j]
+                IM[i][j] = IM[i][j] - crScaler * IM[fd][j]
+    
+    return IM
 
 k = 4
 
@@ -169,7 +164,7 @@ print(points_y)
 # run polynomial fitting with degree k - 1
 lhs = vander(points_x, k)
 rhs = points_y
-solution = np.array(getMatrixInverse(lhs.tolist())).dot(rhs)
+solution = np.array(invert_matrix(lhs.tolist())).dot(rhs)
 
 def fit_func(x, coeffs):
     rev = coeffs[::-1]
