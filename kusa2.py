@@ -150,7 +150,7 @@ def invert_matrix(A, tol=None):
     
     return IM
 
-k = 4
+k = 10
 
 points_x = np.array([Mod(random.randint(0, p - 1), p) for i in range(k)])
 points_y = np.array([Mod(random.randint(0, p - 1), p) for i in range(k)])
@@ -166,7 +166,7 @@ print(points_y)
 # run polynomial fitting with degree k - 1
 lhs = vander(points_x, k)
 rhs = points_y
-solution = np.array(invert_matrix(lhs.tolist())).dot(rhs)
+solution = invert_matrix(lhs).dot(rhs)
 
 def fit_func(x, coeffs):
     rev = coeffs[::-1]
@@ -184,7 +184,6 @@ for i in range(k):
     assert(fit_func(x, solution) == y)
 
 import hashlib
-
 
 print("COMPOUND KEY")
 print(solution)
