@@ -1,6 +1,8 @@
 # Statistics (and a little cryptography) over a finite field
-# polynomial fitting
-# use numpy
+# composite multiple base keys to a single masterkey using polynomial fitting
+# the masterkey cannot be computed without having at least k base keys
+# the masterkey can ganerate base keys
+# use numpy to run this script
 
 def tomod(obj, p):
     if type(obj) == Mod:
@@ -183,5 +185,9 @@ for i in range(k):
 
 import hashlib
 
+
 print("COMPOUND KEY")
+print(solution)
+
+print("COMPOUND KEY (HASH)")
 print(hashlib.sha256(str(solution).encode()).hexdigest())
