@@ -139,7 +139,7 @@ def dotinv(mat):
     reduction_scale(mats)
     return out
 
-# make vandermonde matrix with shape (k, k) and parameter x
+# make vandermonde matrix with shape (k, k) and parameters x
 def vander(x, k):
     out = Mat([0]*(k*k), k, k)
     tmp = Vec([1]*k)
