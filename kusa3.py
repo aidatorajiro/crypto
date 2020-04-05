@@ -146,6 +146,10 @@ class Mat(object):
     def mul_row_with(self, i, v):
         for j in range(self.n):
             self.d[i*self.m + j] *= v
+    def copy(self):
+        return Mat(self.d.copy(), self.n, self.m)
+    def map(self, f):
+        return Mat(list(map(f, self.d)), self.n, self.m)
     def __add__(self, other):
         return mat_add(self, other)
     def __radd__(self, other):
@@ -175,6 +179,10 @@ class Vec(object):
         self.n = len(d)
     def pos(self, x):
         return self.d[x]
+    def copy(self):
+        return Vec(self.d.copy())
+    def map(self, f):
+        return Vec(list(map(f, self.d)))
     def __add__(self, other):
         other = tovec(other)
         return mat_add(self, other)
@@ -272,10 +280,9 @@ test_mat_5 = mat_identity(3)
 reduction([test_mat_4, test_mat_5], "up")
 reduction([test_mat_4, test_mat_5], "down")
 reduction_scale([test_mat_4, test_mat_5])
-print(test_mat_4_orig*test_mat_5)
+assert (test_mat_4_orig*test_mat_5).map(lambda x: round(x, 10)) == mat_identity(3)
 
 p = 0x1630754518592437521810394623170439071787346163136715732951116994613647026908158243257902189
-
 
 """
 import numpy as np
