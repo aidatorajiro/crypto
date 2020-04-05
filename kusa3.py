@@ -98,6 +98,10 @@ def mat_dot(a, b):
     raise Exception("invalid argument")
 
 # destructive function to perform a gaussian reduction
+# mats is a list of matrices
+# if you set method == 'down', it will perform downward reduction and mats[0] will be upper triangular matrix
+# if you set method == 'up', it will perform upward reduction and mats[0] will be lower triangular matrix
+# matrices in mats other than mats[0] will follow reduction of mats[0]
 def reduction(mats, method):
     n = mats[0].n
     if method == 'down':
@@ -118,6 +122,23 @@ def reduction(mats, method):
             for mat in mats:
                 mat.add_row_vec(j, mat.getrow(i).__mul__(coeff))
 
+# scale each rows in mats so that mats[0] will be an identity matrix.
+def reduction_scale(mats):
+    for i in range(mats[0].n):
+        scale = 1/mats[0].pos(i, i)
+        for mat in mats:
+            mat.mul_row_with(i, scale)
+
+# use gaussian reduction to calculate an inverse matrix
+def dotinv(mat):
+    mat = mat.copy()
+    out = mat_identity(mat.n)
+    mats = [mat, out]
+    reduction(mats, 'down')
+    reduction(mats, 'up')
+    reduction_scale(mats)
+    return out
+
 # make vandermonde matrix with shape (k, k) and parameter x
 def vander(x, k):
     out = Mat([0]*(k*k), k, k)
@@ -127,21 +148,6 @@ def vander(x, k):
             out.modify(i, j, tmp.d[i])
         for i in range(k):
             tmp.d[i] *= x.d[i]
-    return out
-
-def reduction_scale(mats):
-    for i in range(mats[0].n):
-        scale = 1/mats[0].pos(i, i)
-        for mat in mats:
-            mat.mul_row_with(i, scale)
-
-def dotinv(mat):
-    mat = mat.copy()
-    out = mat_identity(mat.n)
-    mats = [mat, out]
-    reduction(mats, 'down')
-    reduction(mats, 'up')
-    reduction_scale(mats)
     return out
 
 class Mat(object):
@@ -156,8 +162,10 @@ class Mat(object):
     def getcol(self, i):
         assert i < self.m
         return Vec([self.d[t] for t in range(i, self.n*self.m, self.m)])
+    # get value at position (row = x, column = y)
     def pos(self, x, y):
         return self.d[x*self.m + y]
+    # change position (row = x, column = y) to v
     def modify(self, x, y, v):
         self.d[x*self.m + y] = v
     # add specified row vector to specified row index
@@ -171,6 +179,7 @@ class Mat(object):
             self.d[i*self.m + j] *= v
     def copy(self):
         return Mat(self.d.copy(), self.n, self.m)
+    # destructive map function
     def map_dest(self, f):
         for i in range(self.n*self.m):
             self.d[i] = f(self.d[i])
@@ -208,6 +217,7 @@ class Vec(object):
         return self.d[x]
     def copy(self):
         return Vec(self.d.copy())
+    # destructive map function
     def map_dest(self, f):
         for i in range(self.n):
             self.d[i] = f(self.d[i])
@@ -288,6 +298,8 @@ import random
 
 if __name__ == "__main__":
     k = 15
+    
+    print("k = %d" % k)
     
     points_x = Vec([Mod(random.randint(0, p - 1), p) for i in range(k)])
     points_y = Vec([Mod(random.randint(0, p - 1), p) for i in range(k)])
