@@ -121,6 +121,15 @@ def reduction_scale(mats):
         for mat in mats:
             mat.mul_row_with(i, scale)
 
+def dotinv(mat):
+    mat = mat.copy()
+    out = mat_identity(mat.n)
+    mats = [mat, out]
+    reduction(mats, 'down')
+    reduction(mats, 'up')
+    reduction_scale(mats)
+    return out
+
 class Mat(object):
     def __init__(self, d, n, m):
         assert len(d) == n*m
@@ -275,12 +284,7 @@ assert 2/Vec([1,1,1]) == Vec([2,2,2])
 assert 2*Vec([1,1,1]) == Vec([2,2,2])
 
 test_mat_4 = Mat([5,3,6,2,6,7,1,3,6], 3, 3)
-test_mat_4_orig = Mat(test_mat_4.d.copy(), 3, 3)
-test_mat_5 = mat_identity(3)
-reduction([test_mat_4, test_mat_5], "up")
-reduction([test_mat_4, test_mat_5], "down")
-reduction_scale([test_mat_4, test_mat_5])
-assert (test_mat_4_orig*test_mat_5).map(lambda x: round(x, 10)) == mat_identity(3)
+assert (test_mat_4*dotinv(test_mat_4)).map(lambda x: round(x, 10)) == mat_identity(3)
 
 p = 0x1630754518592437521810394623170439071787346163136715732951116994613647026908158243257902189
 
