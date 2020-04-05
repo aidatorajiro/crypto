@@ -150,18 +150,18 @@ def invert_matrix(A, tol=None):
     
     return IM
 
-k = 10
+k = 15
 
 points_x = np.array([Mod(random.randint(0, p - 1), p) for i in range(k)])
 points_y = np.array([Mod(random.randint(0, p - 1), p) for i in range(k)])
+
+#points_x = np.array([random.random() for i in range(k)])
+#points_y = np.array([random.random() for i in range(k)])
 
 print("INDIVIDUAL KEYS X")
 print(points_x)
 print("INDIVIDUAL KEYS Y")
 print(points_y)
-
-#points_x = np.array([random.random() for i in range(k)])
-#points_y = np.array([random.random() for i in range(k)])
 
 # run polynomial fitting with degree k - 1
 lhs = vander(points_x, k)
