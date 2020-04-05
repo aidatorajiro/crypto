@@ -299,7 +299,6 @@ if __name__ == "__main__":
     
     # run polynomial fitting with degree k - 1
     lhs = vander(points_x, k)
-    print(lhs)
     rhs = points_y
     solution = dotinv(lhs)*rhs
     
