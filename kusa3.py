@@ -1,4 +1,4 @@
-# Statistics (and a little cryptography) over a finite field
+# Statistics (and a little cryptography) over a finite field - fullscratch version
 # composite multiple base keys to a single masterkey using polynomial fitting
 # the masterkey cannot be computed without having at least k base keys
 # the masterkey can ganerate base keys
@@ -86,6 +86,9 @@ def mat_add(a, b):
 def mat_dot(a, b):
     if type(a) == Vec and type(b) == Vec and a.n == b.n:
         return sum([a.d[i] * b.d[i] for i in range(a.n)])
+    if type(a) == Mat and type(b) == Vec and a.m == b.n:
+        bb = Mat(b.d, b.n, 1)
+        return mat_dot(a, bb)
     if type(a) == Mat and type(b) == Mat and a.m == b.n:
         l = []
         for i in range(a.n):
@@ -113,7 +116,18 @@ def reduction(mats, method):
             edge_j = mats[0].pos(j, i)
             coeff = -(edge_j/edge_i)
             for mat in mats:
-                mat.add_row_vec(j, coeff*mat.getrow(i))
+                mat.add_row_vec(j, mat.getrow(i).__mul__(coeff))
+
+# make vandermonde matrix with shape (k, k) and parameter x
+def vander(x, k):
+    out = Mat([0]*(k*k), k, k)
+    tmp = Vec([1]*k)
+    for j in range(k-1, -1, -1):
+        for i in range(k):
+            out.modify(i, j, tmp.d[i])
+        for i in range(k):
+            tmp.d[i] *= x.d[i]
+    return out
 
 def reduction_scale(mats):
     for i in range(mats[0].n):
@@ -138,10 +152,10 @@ class Mat(object):
         self.m = m
     def getrow(self, i):
         assert i < self.n
-        return tovec(self.d[i*self.m:(i + 1)*self.m])
+        return Vec(self.d[i*self.m:(i + 1)*self.m])
     def getcol(self, i):
         assert i < self.m
-        return tovec([self.d[t] for t in range(i, self.n*self.m, self.m)])
+        return Vec([self.d[t] for t in range(i, self.n*self.m, self.m)])
     def pos(self, x, y):
         return self.d[x*self.m + y]
     def modify(self, x, y, v):
@@ -157,6 +171,10 @@ class Mat(object):
             self.d[i*self.m + j] *= v
     def copy(self):
         return Mat(self.d.copy(), self.n, self.m)
+    def map_dest(self, f):
+        for i in range(self.n*self.m):
+            self.d[i] = f(self.d[i])
+        return self
     def map(self, f):
         return Mat(list(map(f, self.d)), self.n, self.m)
     def __add__(self, other):
@@ -190,6 +208,10 @@ class Vec(object):
         return self.d[x]
     def copy(self):
         return Vec(self.d.copy())
+    def map_dest(self, f):
+        for i in range(self.n):
+            self.d[i] = f(self.d[i])
+        return self
     def map(self, f):
         return Vec(list(map(f, self.d)))
     def __add__(self, other):
@@ -204,24 +226,24 @@ class Vec(object):
             other = tovec(other)
             return mat_dot(self, other)
         else:
-            return Vec(list(map(lambda x: x*other, self.d)))
+            return self.map(lambda x: x*other)
     def __rmul__(self, other):
         # self is right, other is left
         if type(other) == list or type(other) == Vec:
             other = tovec(other)
             return mat_dot(other, self)
         else:
-            return Vec(list(map(lambda x: other*x, self.d)))
+            return self.map(lambda x: other*x)
     def __truediv__(self, other):
         if type(other) == list or type(other) == Vec:
             pass
         else:
-            return Vec(list(map(lambda x: x/other, self.d)))
+            return self.map(lambda x: x/other)
     def __rtruediv__(self, other):
         if type(other) == list or type(other) == Vec:
             pass
         else:
-            return Vec(list(map(lambda x: other/x, self.d)))
+            return self.map(lambda x: other/x)
     def __repr__(self):
         return str(self.d)
     def __neg__(self):
@@ -260,104 +282,46 @@ def ext_euc(a1, b1):
         a = b
         b = d
 
-
-# tests
-#from kusa3 import *
-
-test_mat_1 = Mat([1,2,3,4,5,6], 2, 3)
-test_mat_2 = Mat([7,8,9,10,11,12], 3, 2)
-
-assert test_mat_1.getrow(0) == [1,2,3]
-assert test_mat_1.getrow(1) == [4,5,6]
-assert test_mat_1.getcol(1) == [2,5]
-
-assert test_mat_1*test_mat_2 == Mat([58, 64, 139, 154], 2, 2)
-
-test_mat_3 = Mat([1,2,3,4,5,6], 2, 3)
-test_mat_3.add_row_vec(1, Vec([1,1,1]))
-assert test_mat_3 == Mat([1,2,3,5,6,7], 2, 3)
-assert -Vec([1,1,1]) == Vec([-1,-1,-1])
-assert -Mat([1,2,3,4,5,6], 2, 3) == Mat([-1,-2,-3,-4,-5,-6], 2, 3)
-assert Vec([1,1,1])/2 == Vec([1/2,1/2,1/2])
-assert Vec([1,1,1])*2 == Vec([2,2,2])
-assert 2/Vec([1,1,1]) == Vec([2,2,2])
-assert 2*Vec([1,1,1]) == Vec([2,2,2])
-
-test_mat_4 = Mat([5,3,6,2,6,7,1,3,6], 3, 3)
-assert (test_mat_4*dotinv(test_mat_4)).map(lambda x: round(x, 10)) == mat_identity(3)
-
 p = 0x1630754518592437521810394623170439071787346163136715732951116994613647026908158243257902189
 
-"""
-import numpy as np
 import random
-from numpy.lib.twodim_base import vander
 
-# based on https://integratedmlai.com/matrixinverse/
-def invert_matrix(A, tol=None):
- 
-    # Section 2: Make copies of A & I, AM & IM, to use for row ops
-    n = len(A)
-    AM = A.copy()
-    IM = np.identity(n, dtype=object)
- 
-    # Section 3: Perform row operations
-    indices = list(range(n)) # to allow flexible row referencing ***
-    for fd in range(n): # fd stands for focus diagonal
-        fdScaler = 1 / AM[fd][fd]
-        # FIRST: scale fd row with fd inverse. 
-        for j in range(n): # Use j to indicate column looping.
-            AM[fd][j] *= fdScaler
-            IM[fd][j] *= fdScaler
-        # SECOND: operate on all rows except fd row as follows:
-        for i in indices[0:fd] + indices[fd+1:]: 
-            # *** skip row with fd in it.
-            crScaler = AM[i][fd] # cr stands for "current row".
-            for j in range(n): 
-                # cr - crScaler * fdRow, but one element at a time.
-                AM[i][j] = AM[i][j] - crScaler * AM[fd][j]
-                IM[i][j] = IM[i][j] - crScaler * IM[fd][j]
+if __name__ == "__main__":
+    k = 15
     
-    return IM
-
-k = 15
-
-points_x = np.array([Mod(random.randint(0, p - 1), p) for i in range(k)])
-points_y = np.array([Mod(random.randint(0, p - 1), p) for i in range(k)])
-
-#points_x = np.array([random.random() for i in range(k)])
-#points_y = np.array([random.random() for i in range(k)])
-
-print("INDIVIDUAL KEYS X")
-print(points_x)
-print("INDIVIDUAL KEYS Y")
-print(points_y)
-
-# run polynomial fitting with degree k - 1
-lhs = vander(points_x, k)
-rhs = points_y
-solution = invert_matrix(lhs).dot(rhs)
-
-def fit_func(x, coeffs):
-    rev = coeffs[::-1]
-    t = 1
-    out = 0
-    for i in range(len(rev)):
-        out += t*rev[i]
-        t *= x
-    return out
-
-# test fitting
-for i in range(k):
-    x = points_x[i]
-    y = points_y[i]
-    assert(fit_func(x, solution) == y)
-
-import hashlib
-
-print("COMPOUND KEY")
-print(solution)
-
-print("COMPOUND KEY (HASH)")
-print(hashlib.sha256(str(solution).encode()).hexdigest())
-"""
+    points_x = Vec([Mod(random.randint(0, p - 1), p) for i in range(k)])
+    points_y = Vec([Mod(random.randint(0, p - 1), p) for i in range(k)])
+    
+    print("INDIVIDUAL KEYS X")
+    print(points_x)
+    print("INDIVIDUAL KEYS Y")
+    print(points_y)
+    
+    # run polynomial fitting with degree k - 1
+    lhs = vander(points_x, k)
+    print(lhs)
+    rhs = points_y
+    solution = dotinv(lhs)*rhs
+    
+    def fit_func(x, coeffs):
+        rev = coeffs.d[::-1]
+        t = 1
+        out = 0
+        for i in range(len(rev)):
+            out += t*rev[i]
+            t *= x
+        return out
+    
+    # test fitting
+    for i in range(k):
+        x = points_x.d[i]
+        y = points_y.d[i]
+        assert(fit_func(x, solution) == y)
+    
+    import hashlib
+    
+    print("COMPOUND KEY")
+    print(solution)
+    
+    print("COMPOUND KEY (HASH)")
+    print(hashlib.sha256(str(solution).encode()).hexdigest())
