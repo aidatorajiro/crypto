@@ -300,14 +300,17 @@ if __name__ == "__main__":
     k = 15
     
     print("k = %d" % k)
+    print()
     
     points_x = Vec([Mod(random.randint(0, p - 1), p) for i in range(k)])
     points_y = Vec([Mod(random.randint(0, p - 1), p) for i in range(k)])
     
     print("INDIVIDUAL KEYS X")
-    print(points_x)
+    list(map(print,points_x.d))
+    print()
     print("INDIVIDUAL KEYS Y")
-    print(points_y)
+    list(map(print,points_y.d))
+    print()
     
     # run polynomial fitting with degree k - 1
     lhs = vander(points_x, k)
