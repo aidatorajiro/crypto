@@ -306,16 +306,17 @@ if __name__ == "__main__":
     points_y = Vec([Mod(random.randint(0, p - 1), p) for i in range(k)])
     
     print("INDIVIDUAL KEYS X")
-    list(map(print,points_x.d))
+    print(points_x)
     print()
+    
     print("INDIVIDUAL KEYS Y")
-    list(map(print,points_y.d))
+    print(points_y)
     print()
     
     # run polynomial fitting with degree k - 1
     lhs = vander(points_x, k)
     rhs = points_y
-    solution = dotinv(lhs)*rhs
+    solution = (dotinv(lhs)*rhs).getcol(0)
     
     def fit_func(x, coeffs):
         rev = coeffs.d[::-1]
@@ -336,6 +337,7 @@ if __name__ == "__main__":
     
     print("COMPOUND KEY")
     print(solution)
+    print()
     
     print("COMPOUND KEY (HASH)")
     print(hashlib.sha256(str(solution).encode()).hexdigest())
