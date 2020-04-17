@@ -2,7 +2,6 @@
 # composite multiple base keys to a single masterkey using polynomial fitting
 # the masterkey cannot be computed without having at least k base keys
 # the masterkey can ganerate base keys
-# use numpy to run this script
 
 def tomod(obj, p):
     if type(obj) == Mod:
