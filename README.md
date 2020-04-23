@@ -55,7 +55,7 @@ These python scripts are greatly helped by the stackoverflow post : <https://sta
 - kusa4.py - polynomial fitting (with loss) over a finite field, pure python (WIP)
 - kusa4.test.py - tests of kusa4.py
 
-## Learning with error
+## Learning with Error
 - lwe_sugoi.py - Learning with error cryptosystem in python (requires library mpmath).
 
 ## Post-Quantum RSA (multi prime RSA)
@@ -63,13 +63,13 @@ These python scripts are greatly helped by the stackoverflow post : <https://sta
 - pqrsa_decr.py - decrypt
 - pqrsa_decr_2.py - decrypt
 
-## Utility tools for monoalphabetic substitution cryptosystem
+## Monoalphabetic Substitution Cryptosystem
 - mono_decr.py - Simple decryptor.
 - mono_kaiseki.py - Count each characters
 - mono_shuukei.py - Count consecutive characters.
 - monosol - Graphical monoalphabetic substitution solver using Vue.js. <http://aidatorajiro.github.io/crypto/monosol>
 
-### Decrypting romaji ciphertext
+### Decrypting Romaji Ciphertext
 - KWDLC - You have to download this from <https://github.com/ku-nlp/KWDLC> in order to run `mono_kana*.py`.
 - mono_kana_cipher.txt - Ciphertext input for `mono_kana*.py`. You have to create this file.
 - mono_kana_setting.py - Setting for `mono_kana*.py`. You have to create this file.
