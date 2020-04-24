@@ -78,6 +78,7 @@ These python scripts are greatly helped by the stackoverflow post : <https://sta
 - mono_kana1.py - Count each characters from KWDLC
 - mono_kana2.py - PCA Analysis of neighbor count (separated matrix)
 - mono_kana3.py - PCA Analysis of neighbor count (concatenated matrix)
+- mono_kana4.py
 
 ## TLS 1.3 (X25519, EMSA_PSS_VERIFY, etc.)
 - ssl.gp - fullscratch TLS 1.3 related program (WIP?)

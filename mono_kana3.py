@@ -487,20 +487,29 @@ if __name__ == '__main__':
                     kana = line.split(' ')[1]
                     corps_plain.append(kana_to_romaji(kana))
     
-    for corps, table, chars in [[corps_cipher, cipher_table, cipher_chars], [corps_plain, plain_table, plain_chars]]:
+    mats = []
+    
+    args = [[corps_cipher, cipher_table, cipher_chars], [corps_plain, plain_table, plain_chars]]
+    
+    for corps, table, chars in args:
         mat = np.zeros((num_chars,num_chars),dtype=np.float32)
         
         learn(mat, corps, table)
         
         mat = normalize(mat)
         
-        pca = PCA(n_components=2)
+        mats.append(mat)
     
-        mat_reduced = pca.fit_transform(mat)
-
-        plt.scatter(mat_reduced[:,0], mat_reduced[:,1])
-        
-        for i, v in enumerate(mat_reduced):
-            plt.annotate(chars[i], xy=(v[0], v[1]))
+    pca = PCA(n_components=2)
+    
+    mats_reduced = pca.fit_transform(np.concatenate(mats))
+    
+    for i in range(len(args)):
+        plt.scatter(mats_reduced[(i)*num_chars:(i + 1)*num_chars,:][:,0], mats_reduced[(i)*num_chars:(i + 1)*num_chars,:][:,1])
+    
+    print(mats_reduced, mats_reduced.shape, num_chars)
+    
+    for i, v in enumerate(mats_reduced):
+        plt.annotate(args[i // num_chars][2][i % num_chars], xy=(v[0], v[1]))
     
     plt.show()
