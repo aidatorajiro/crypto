@@ -72,13 +72,15 @@ These python scripts are greatly helped by the stackoverflow post : <https://sta
 ### Decrypting Romaji Ciphertext
 - KWDLC - You have to download this from <https://github.com/ku-nlp/KWDLC> in order to run `mono_kana*.py`.
 - mono_kana_cipher.txt - Ciphertext input for `mono_kana*.py`. You have to create this file.
+  `"\n"` (LF) can be used as a separator.
 - mono_kana_setting.py - Setting for `mono_kana*.py`. You have to create this file.
   Set the contents to `cipher_char_whitelist = "<all chars that appear in ciphertext>"`.  
   `cipher_char_whitelist` must be 23 character length.
 - mono_kana1.py - Count each characters from KWDLC
 - mono_kana2.py - PCA Analysis of neighbor count (separated matrix)
 - mono_kana3.py - PCA Analysis of neighbor count (concatenated matrix)
-- mono_kana4.py
+- mono_kana4.py - PCA Analysis of neighbor count (separated matrix, use different normalization)
+- mono_kana5.py - PCA Analysis of neighbor count (separated matrix, mono_kana_setting.py not needed)
 
 ## TLS 1.3 (X25519, EMSA_PSS_VERIFY, etc.)
 - ssl.gp - fullscratch TLS 1.3 related program (WIP?)

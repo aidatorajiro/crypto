@@ -11,7 +11,9 @@
 # http://www.apache.org/licenses/LICENSE-2.0
 
 import glob
-from mono_kana_setting import cipher_char_whitelist
+import numpy as np
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
 
 kanamap = {
     'あ': 'a',
@@ -422,19 +424,12 @@ kanamap = {
     'ヮ': 'xwa',
 }
 
-def make_char_to_index_table(text):
+def make_chars_and_table(text):
     chars = sorted(set(text))
     table = {}
     for i in range(len(chars)):
         table[chars[i]] = i
     return chars, table
-
-plain_chars, plain_table = make_char_to_index_table(''.join(kanamap.values()))
-cipher_chars, cipher_table = make_char_to_index_table(cipher_char_whitelist)
-print("checking len(cipher_char_whitelist) == " + str(len(plain_table)))
-assert len(plain_table) == len(cipher_table)
-print("OK")
-num_chars = len(plain_table)
 
 def kana_to_romaji(kana):
     i = 0
@@ -464,23 +459,13 @@ def learn(mat, corps, table):
                 mat[table[line[x]], table[line[y]]] += 1
                 mat[table[line[y]], table[line[x]]] += 1
 
-import numpy as np
-
-from sklearn.decomposition import PCA
-
-import matplotlib.pyplot as plt
-
 #def normalize(mat):
 #    return (mat - mat.mean(1).reshape(mat.shape[0],1)) / (mat.std(1).reshape(mat.shape[0],1))
 
 def normalize(mat):
-    return mat / mat.sum()
+    return (mat - mat.mean()) / (mat.std())
 
 if __name__ == '__main__':
-    
-    with open("mono_kana_cipher.txt") as f:
-        corps_cipher = (''.join([c for c in f.read() if c in cipher_chars or c == '\n'])).split('\n')
-    
     corps_plain = []
     for filename in glob.glob('KWDLC/knp/*/*'):
         with open(filename) as f:
@@ -489,12 +474,18 @@ if __name__ == '__main__':
                     kana = line.split(' ')[1]
                     corps_plain.append(kana_to_romaji(kana))
     
+    with open("mono_kana_cipher.txt") as f:
+        corps_cipher = f.read().split('\n')
+    
+    plain_chars, plain_table = make_chars_and_table(''.join(kanamap.values()))
+    cipher_chars, cipher_table = make_chars_and_table(''.join(corps_cipher))
+    
     mats = []
     
     args = [[corps_cipher, cipher_table, cipher_chars], [corps_plain, plain_table, plain_chars]]
     
     for corps, table, chars in args:
-        mat = np.zeros((num_chars,num_chars),dtype=np.float32)
+        mat = np.zeros((len(table),len(table)),dtype=np.float32)
         
         learn(mat, corps, table)
         
