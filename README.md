@@ -46,6 +46,8 @@ These python scripts are greatly helped by the stackoverflow post : <https://sta
 - eth_wallet.js - Ethereum wallet
 - eth_wallet_2.js - Ethereum wallet (WIP)
 - segwit_addr.js - SegWit address
+- zclib.py - ZCash transaction parse library
+- zcrpc.py - ZCash RPC
 
 ## Statistics and Machine Learning over a Finite Field
 - kusa.py - mean, variance, Standard deviation (if exists) in a finite field
