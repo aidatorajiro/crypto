@@ -193,7 +193,7 @@ def getShieldedSpend(st):
     spendAuthSig
   ))
 
-ShieldedOutput = namedtuple("ShieldedSpend", (
+ShieldedOutput = namedtuple("ShieldedOutput", (
   "cv",
   "cmu",
   "ephemeralKey",
