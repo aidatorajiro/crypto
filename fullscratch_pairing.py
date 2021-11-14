@@ -4,6 +4,38 @@ import hashlib
 Point = namedtuple("Point", "x y")
 O = 'Origin'
 
+def ext_euc(a, b):
+    e1 = 0
+    f1 = 0
+    c = a // b
+    d = a - c*b
+    e2 = 1
+    f2 = -1*c
+    if d == 0:
+        return (a, b, c, d, e1, f1, e2, f2, 0, 0)
+    a = b
+    b = d
+    c = a // b
+    d = a - c*b
+    e3 = -1*c*e2
+    f3 = 1-c*f2
+    if d == 0:
+        return (a, b, c, d, e1, f1, e2, f2, e3, f3)
+    while True:
+        a = b
+        b = d
+        c = a // b
+        d = a - c*b
+        e1 = e2
+        f1 = f2
+        e2 = e3
+        f2 = f3
+        e3 = e1 - c*e2
+        f3 = f1 - c*f2
+        if d == 0:
+            break
+    return (a, b, c, d, e1, f1, e2, f2, e3, f3)
+
 def tocomp(obj):
     if type(obj) == int or type(obj) == Mod:
         return Complex(obj, 0)
@@ -89,7 +121,7 @@ class Mod(object):
 
     def __truediv__(self, other):
         k = tomod(other, self.p)
-        return Mod(self.n * pow(k.n, p - 2, self.p), self.p)
+        return Mod((self.n * ext_euc(self.p, k.n) [7]) % self.p, self.p)
     
     def __rtruediv__(self, other):
         k = tomod(other, self.p)
@@ -147,7 +179,7 @@ class Curve:
         else:
             # Cases not involving the origin.
             if P == Q:
-                dydx = (3 * P.x**2 + self.a) / (2 * P.y)
+                dydx = (3 * P.x ** 2 + self.a) / (2 * P.y)
             else:
                 dydx = (Q.y - P.y) / (Q.x - P.x)
             x = dydx**2 - P.x - Q.x
@@ -172,23 +204,20 @@ class Curve:
             if self.inv(P1) == P2:
                 return Q.x - P1.x
             if P1 == P2:
-                lam = (3*P1.x + self.a)/(2*P1.y)
+                lam = (3 * P1.x ** 2 + self.a)/(2 * P1.y)
             else:
                 lam = (P2.y - P1.y)/(P2.x - P1.x)
-            return Q.y - lam*(Q.x - P1.x) - P1.y
+            P3 = self.add(P1, P2)
+            return (Q.y - lam*(Q.x - P1.x) - P1.y)/(Q.x - P3.x)
         f = 1
         V = P
         bs = format(l, 'b')[1:]
         for i in bs:
-            V_dbl = self.add(V, V)
-            if V_dbl != 'Origin':
-                f = (f*f*g(V, V))/(g(V_dbl, self.inv(V_dbl)))
-            V = V_dbl
+            f = f*f*g(V, V)
+            V = self.add(V, V)
             if i == '1':
-                V_add = self.add(V, P)
-                if V_add != 'Origin':
-                    f = f*(g(V, P))/(g(V_add, self.inv(V_add)))
-                V = V_add
+                f = f*g(V, P)
+                V = self.add(V, P)
         assert V == self.mul(P, l)
         assert V == 'Origin'
         return f
@@ -208,8 +237,8 @@ if __name__ == "__main__":
             Mod(0x12c85ea5db8c6deb4aab71808dcb408fe3d1e7690c43d37b4ce6cc0166fa7daa, p), 
             Mod(0x090689d0585ff075ec9e99ad690c3395bc4b313370b38ef355acdadcd122975b, p)))
 
-    X = E1.mul(P1, 10000)
-    Y = E2.mul(P2, 50000)
+    #X = E1.mul(P1, 10000)
+    #Y = E2.mul(P2, 50000)
 
     # order
     l = 21888242871839275222246405745257275088548364400416034343698204186575808495617
@@ -222,8 +251,12 @@ if __name__ == "__main__":
 
     w = lambda X, Y: E1.miller(X, Y, l)/E2.miller(Y, X, l)
 
-    print(w(X, Y))
-    #print(w(P1, P2)**(10000*50000))
+    print(w(E1.add(E1.mul(P1, 10000), E1.mul(P1, 30000)), E2.mul(P2, 1)))
+    print(w(E1.mul(P1, 10000), E2.mul(P2, 1)) * w(E1.mul(P1, 30000), E2.mul(P2, 1)))
+    
+    print(w(E1.mul(P1, 123), E2.mul(P2, 100)))
+    print(w(E1.mul(P1, 123*100), E2.mul(P2, 1)))
+    print(w(P1, P2)**(123*100))
 
     #print(w(E1.mul(P1, 1), E2.mul(P2, 1)))
 
