@@ -211,9 +211,9 @@ class Curve:
                 lam = (3 * P1.x ** 2 + self.a)/(2 * P1.y)
             else:
                 if P1 == "Origin":
-                    wakaran # div f = (P2) - (O)
+                    raise NotImplementedError("wakaran") # div f = (P2) - (O) → ???
                 if P2 == "Origin":
-                    wakaran # div f = (P1) - (O)
+                    raise NotImplementedError("wakaran") # div f = (P1) - (O) → ???
                 lam = (P2.y - P1.y)/(P2.x - P1.x)
             P3 = self.add(P1, P2)
             return (Q.y - lam*(Q.x - P1.x) - P1.y)/(Q.x - P3.x)
@@ -230,15 +230,20 @@ class Curve:
         return f
 
 if __name__ == "__main__":
-    p = 473361682919  # a prime s.t. p % 4 == 3, and sqrt(2) exists in F_p, and p + 1 has a big prime factor
+    p = 473361682919  # a prime s.t. p % 4 == 3, p % 3 == 2, and sqrt(2) exists in F_p, and p + 1 has a big prime factor
     
     E1 = Curve(Complex(Mod(0, p), Mod(0, p)), Complex(Mod(3, p), Mod(0, p)))
     P1 = Point(Complex(Mod(1, p), Mod(0, p)), Complex(Mod(2, p), Mod(0, p)))
     
+    sqex = (p + 1) // 4
+    
+    sq2 = Complex(Mod(2, p), Mod(0, p)) ** sqex
+    assert sq2 ** 2 == Complex(Mod(2, p), Mod(0, p))
+    
+    sq3 = Complex(Mod(3, p), Mod(0, p)) ** sqex
+    assert sq3 ** 2 == Complex(Mod(3, p), Mod(0, p))
+    
     def mkp(k):
-        sqex = (p + 1) // 4
-        sq2 = Complex(Mod(2, p), Mod(0, p)) ** sqex
-        assert sq2 ** 2 == Complex(Mod(2, p), Mod(0, p))
         A = Mod(k, p)
         B = ( (A**3 + 3)/(3 * A) ) ** sqex
         assert B**2 == (A**3 + 3)/(3 * A)
@@ -250,7 +255,9 @@ if __name__ == "__main__":
         
         return Point(X, Y)
     
-    P2 = mkp(2)
+    P2 = mkp(5)
+    
+    P3 = mkp(11)
     
     # common order for all points
     l = p + 1
@@ -260,5 +267,29 @@ if __name__ == "__main__":
     w = lambda X, Y: E1.miller(X, Y, l)/E1.miller(Y, X, l)
     
     print(w(P1, P2))
+    print(w(E1.mul(P1, 123), E1.mul(P2, 947)))
+    print(w(E1.mul(P1, 116481), E1.mul(P2, 1)))
     
-    print(w(E1.mul(P1, 100), E1.mul(P2, 100)) == w(E1.mul(P1, 10000), E1.mul(P2, 1)))
+    print(w(E1.mul(P1, 10001), E1.mul(P2, 1)))
+    print(w(E1.mul(P1, 10003), E1.mul(P2, 1)))
+    print(w(E1.mul(P1, 10005), E1.mul(P2, 1)))
+    
+    print(w(E1.mul(P1, 8873), E1.mul(P2, 9291)))
+    print(w(E1.mul(P1, 1), E1.mul(P2, 8873*9291)))
+    
+    sanbai = -Complex(Mod(1, p), Mod(0, p)) / 2 + sq3*Complex(Mod(0, p), Mod(1, p)) / 2
+    
+    s = lambda X: Point(sanbai * X.x, X.y)
+    
+    ww = lambda X, Y: w(X, s(Y))
+    
+    print(ww(E1.mul(P1, 943), E1.mul(P2, 917)))
+    print(ww(E1.mul(P1, 1), E1.mul(P2, 943*917)))
+    print(ww(E1.mul(P1, 1), E1.mul(P2, 3)))
+    print(ww(E1.mul(P1, 1), E1.mul(P2, 5)))
+    print(ww(E1.mul(P1, 1), E1.mul(P2, 7)))
+    
+    print(ww(E1.mul(P2, 857), E1.mul(P3, 117)))
+    print(ww(E1.mul(P2, 857*117), E1.mul(P3, 1)))
+    print(ww(E1.mul(P2, 3), E1.mul(P3, 5)))
+    print(ww(E1.mul(P2, 15), E1.mul(P3, 1)))
