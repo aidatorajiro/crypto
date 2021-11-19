@@ -25,8 +25,10 @@ My codes on crypto.
 
 ### Python Fullscratch Project
 
-These python scripts are greatly helped by the stackoverflow post : <https://stackoverflow.com/questions/31074172/elliptic-curve-point-addition-over-a-finite-field-in-python>.
+These python scripts are greatly helped by the stackoverflow post : <https://stackoverflow.com/questions/31074172/elliptic-curve-point-addition-over-a-finite-field-in-python>. And here: <https://crypto.stanford.edu/pbc/notes/ep/tate.html> <https://github.com/herumi/ango>
 
+- fullscratch_pairing_weil.py - fullscratch weil pairing.
+- fullscratch_pairing_tate.py - fullscratch tate pairing.
 - fullscratch.py - fullscratch ECDSA in python.
 - fullscratch_address.py - fullscratch ECDSA address generation in python.
 - fullscratch_elgamal.py - fullscratch EC elgamal in python. (WIP?)

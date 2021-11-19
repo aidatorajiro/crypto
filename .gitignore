@@ -189,7 +189,9 @@ Temporary Items
 .apdisk
 
 
-KWDLC/
+KWDLC*/
+zclibs*/
 mono_kana_cipher.txt
 mono_kana_setting.py
-/corps*
+monosol/corps*
+monosol/preset.*
