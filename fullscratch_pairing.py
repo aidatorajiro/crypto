@@ -121,6 +121,8 @@ class Mod(object):
 
     def __truediv__(self, other):
         k = tomod(other, self.p)
+        if k.n == 1:
+            return self
         return Mod((self.n * ext_euc(self.p, k.n) [7]) % self.p, self.p)
     
     def __rtruediv__(self, other):

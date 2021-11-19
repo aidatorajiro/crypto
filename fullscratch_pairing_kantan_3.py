@@ -1,3 +1,5 @@
+# fullscratch weil pairing
+
 from collections import namedtuple
 import hashlib
 
@@ -121,6 +123,8 @@ class Mod(object):
 
     def __truediv__(self, other):
         k = tomod(other, self.p)
+        if k.n == 1:
+            return self
         return Mod((self.n * ext_euc(self.p, k.n) [7]) % self.p, self.p)
     
     def __rtruediv__(self, other):
@@ -261,7 +265,7 @@ if __name__ == "__main__":
     
     # common order for all points
     l = p + 1
-    assert E1.mul(P1, l) == E1.mul(P2, l) == "Origin"
+    assert E1.mul(P1, l) == E1.mul(P2, l) == E1.mul(P3, l) == "Origin"
     
     # weil pairing
     w = lambda X, Y: E1.miller(X, Y, l)/E1.miller(Y, X, l)
