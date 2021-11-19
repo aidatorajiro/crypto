@@ -4,38 +4,6 @@ import hashlib
 Point = namedtuple("Point", "x y")
 O = 'Origin'
 
-def ext_euc(a, b):
-    e1 = 0
-    f1 = 0
-    c = a // b
-    d = a - c*b
-    e2 = 1
-    f2 = -1*c
-    if d == 0:
-        return (a, b, c, d, e1, f1, e2, f2, 0, 0)
-    a = b
-    b = d
-    c = a // b
-    d = a - c*b
-    e3 = -1*c*e2
-    f3 = 1-c*f2
-    if d == 0:
-        return (a, b, c, d, e1, f1, e2, f2, e3, f3)
-    while True:
-        a = b
-        b = d
-        c = a // b
-        d = a - c*b
-        e1 = e2
-        f1 = f2
-        e2 = e3
-        f2 = f3
-        e3 = e1 - c*e2
-        f3 = f1 - c*f2
-        if d == 0:
-            break
-    return (a, b, c, d, e1, f1, e2, f2, e3, f3)
-
 def tocomp(obj):
     if type(obj) == int or type(obj) == Mod:
         return Complex(obj, 0)
@@ -121,7 +89,7 @@ class Mod(object):
 
     def __truediv__(self, other):
         k = tomod(other, self.p)
-        return Mod((self.n * ext_euc(self.p, k.n) [7]) % self.p, self.p)
+        return Mod(self.n * pow(k.n, self.p - 2, self.p), self.p)
     
     def __rtruediv__(self, other):
         k = tomod(other, self.p)
@@ -147,7 +115,6 @@ class Mod(object):
 
     def __repr__(self):
         return str(self.n % self.p) + " % " + str(self.p)
-
 class Curve:
     def __init__(self, a, b):
         self.a = a
@@ -179,7 +146,7 @@ class Curve:
         else:
             # Cases not involving the origin.
             if P == Q:
-                dydx = (3 * P.x ** 2 + self.a) / (2 * P.y)
+                dydx = (3 * P.x**2 + self.a) / (2 * P.y)
             else:
                 dydx = (Q.y - P.y) / (Q.x - P.x)
             x = dydx**2 - P.x - Q.x
@@ -201,60 +168,91 @@ class Curve:
 
     def miller(self, P, Q, l):
         def g(P1, P2):
+            if P1 == 'Origin':
+                return 1
             if self.inv(P1) == P2:
                 return Q.x - P1.x
             if P1 == P2:
-                lam = (3 * P1.x ** 2 + self.a)/(2 * P1.y)
+                lam = (3*P1.x + self.a)/(2*P1.y)
             else:
                 lam = (P2.y - P1.y)/(P2.x - P1.x)
-            P3 = self.add(P1, P2)
-            return (Q.y - lam*(Q.x - P1.x) - P1.y)/(Q.x - P3.x)
-        f = 1
+            return Q.y - lam*(Q.x - P1.x) - P1.y
+        
         V = P
+        f = 1
         bs = format(l, 'b')[1:]
         for i in bs:
-            f = f*f*g(V, V)
-            V = self.add(V, V)
+            V_dbl = self.add(V, V)
+            f = (f*f*g(V, V))/(g(V_dbl, self.inv(V_dbl)))
+            V = V_dbl
             if i == '1':
-                f = f*g(V, P)
-                V = self.add(V, P)
+                V_add = self.add(V, P)
+                f = f*(g(V, P))/(g(V_add, self.inv(V_add)))
+                V = V_add
+        assert V == self.mul(P, l)
         assert V == 'Origin'
         return f
 
 if __name__ == "__main__":
-    p = 0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47
+    p = 24048719
 
-    E1 = Curve(Complex(Mod(0, p), Mod(0, p)), Complex(Mod(3, p), Mod(0, p)))
-    P1 = Point(Complex(Mod(1, p), Mod(0, p)), Complex(Mod(2, p), Mod(0, p)))
-    P11 = Point(Complex(Mod(4, p), Mod(12146311686009523391118210002076267455962927876315812692460427774962280081954, p)), Complex(Mod(1239216361248477536789871225068500866017125055425451446239070261483273641773, p), Mod(1239216361248477536789871225068500866017125055425451446239070261483273641773, p)))
-
-    E2 = Curve(Complex(Mod(0, p), Mod(0, p)), 3/Complex(Mod(9, p), Mod(1, p)))
-    P2 = Point(
+    E = Curve(Mod(2, p), Mod(3, p))
+    
+    P1 = Point(Mod(17334095, p), Mod(5644719, p))
+    
+    P2 = Point(Mod(10356700, p), Mod(18392425, p))
+    
+    print(E.valid(P1))
+    print(E.valid(P2))
+    
+    """
+    PP = 'Origin'
+    
+    for i in range(p**2):
+        PP = E.add(PP, P)
+        if PP == 'Origin':
+            r = i + 1
+            break
+    
+    def ssqq(x, y):
+        return math.sqrt((math.sqrt(x**2+y**2)+x)/2)
+    
+    list(filter(lambda S: S[0].is_integer(), map(lambda R: [ssqq(R.r, R.i), R], [Complex(x,y)**3 + Complex(x,y)*Complex(13, 19)/2 + Complex(19, 23) for x in range(3, 10) for y in range(3, 10)])))
+    
+    Q = Point(
         Complex(
-            Mod(0x1800deef121f1e76426a00665e5c4479674322d4f75edadd46debd5cd992f6ed, p),
-            Mod(0x198e9393920d483a7260bfb731fb5d25f1aa493335a9e71297e485b7aef312c2, p)),
+            Mod(, p),
+            Mod(, p)),
         Complex(
-            Mod(0x12c85ea5db8c6deb4aab71808dcb408fe3d1e7690c43d37b4ce6cc0166fa7daa, p), 
-            Mod(0x090689d0585ff075ec9e99ad690c3395bc4b313370b38ef355acdadcd122975b, p)))
+            Mod(, p), 
+            Mod(, p)))
+    """
 
     #X = E1.mul(P1, 10000)
     #Y = E2.mul(P2, 50000)
 
-    # order
-    l = 21888242871839275222246405745257275088548364400416034343698204186575808495617
+    # two prime orders
+    l1 = 7933
+    l2 = 379
+    l3 = 7933*379
 
-    # check same order
-    assert(E1.mul(P1, l)==E2.mul(P2, l))
+    # check order
+    print(E.mul(P1, l1))
+    print(E.mul(P2, l2))
 
-    # weil pairing
-    w = lambda X, Y: E1.miller(X, Y, l)/E1.miller(Y, X, l)
-    
-    print(w(P1, ))
+    print(E.miller(E.mul(P2,10), E.mul(P1,10), l2))
+    print(E.miller(E.mul(P2,100), E.mul(P1,1), l2))
 
-    #print(w(E1.add(E1.mul(P1, 10000), E1.mul(P1, 30000)), E2.mul(P2, 1))==w(E1.mul(P1, 10000), E2.mul(P2, 1)) * w(E1.mul(P1, 30000), E2.mul(P2, 1)))
-    
-    #print(w(E1.mul(P1, 123), E2.mul(P2, 100))==w(E1.mul(P1, 123*100), E2.mul(P2, 1)))
-    
+    w = lambda X, Y: E.miller(X, Y, l3)/E.miller(Y, X, l3)
+
+    print(w(E.mul(P1, 10), E.mul(P2, 10)))
+    print(w(E.mul(P1, 100), E.mul(P2, 1)))
+    print(w(E.mul(P1, 1), E.mul(P2, 100)))
+    print(w(E.mul(P1, 1), E.mul(P2, 1)))
+    print(w(E.mul(P1, 1), E.mul(P2, 1))**100)
+    print(w(E.add(E.mul(P1, 10), E.mul(P1, 20)), E.mul(P2, 30)))
+    print(w(E.mul(P1, 10), E.mul(P2, 30)) + w(E.mul(P1, 20), E.mul(P2, 30)))
+
     #print(w(E1.mul(P1, 1), E2.mul(P2, 1)))
 
     #print(e(X, Y))

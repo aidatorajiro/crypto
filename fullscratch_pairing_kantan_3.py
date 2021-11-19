@@ -202,10 +202,18 @@ class Curve:
     def miller(self, P, Q, l):
         def g(P1, P2):
             if self.inv(P1) == P2:
+                if P1 == "Origin":
+                    return 1  # div f = 3(O) - 3(O) = 0 → f = non-zero const .
                 return Q.x - P1.x
             if P1 == P2:
+                if P1 == "Origin":
+                    return 1 # div f = 3(O) - 3(O) = 0 → f = non-zero const .
                 lam = (3 * P1.x ** 2 + self.a)/(2 * P1.y)
             else:
+                if P1 == "Origin":
+                    wakaran # div f = (P2) - (O)
+                if P2 == "Origin":
+                    wakaran # div f = (P1) - (O)
                 lam = (P2.y - P1.y)/(P2.x - P1.x)
             P3 = self.add(P1, P2)
             return (Q.y - lam*(Q.x - P1.x) - P1.y)/(Q.x - P3.x)
@@ -222,40 +230,35 @@ class Curve:
         return f
 
 if __name__ == "__main__":
-    p = 0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47
-
+    p = 473361682919  # a prime s.t. p % 4 == 3, and sqrt(2) exists in F_p, and p + 1 has a big prime factor
+    
     E1 = Curve(Complex(Mod(0, p), Mod(0, p)), Complex(Mod(3, p), Mod(0, p)))
     P1 = Point(Complex(Mod(1, p), Mod(0, p)), Complex(Mod(2, p), Mod(0, p)))
-    P11 = Point(Complex(Mod(4, p), Mod(12146311686009523391118210002076267455962927876315812692460427774962280081954, p)), Complex(Mod(1239216361248477536789871225068500866017125055425451446239070261483273641773, p), Mod(1239216361248477536789871225068500866017125055425451446239070261483273641773, p)))
-
-    E2 = Curve(Complex(Mod(0, p), Mod(0, p)), 3/Complex(Mod(9, p), Mod(1, p)))
-    P2 = Point(
-        Complex(
-            Mod(0x1800deef121f1e76426a00665e5c4479674322d4f75edadd46debd5cd992f6ed, p),
-            Mod(0x198e9393920d483a7260bfb731fb5d25f1aa493335a9e71297e485b7aef312c2, p)),
-        Complex(
-            Mod(0x12c85ea5db8c6deb4aab71808dcb408fe3d1e7690c43d37b4ce6cc0166fa7daa, p), 
-            Mod(0x090689d0585ff075ec9e99ad690c3395bc4b313370b38ef355acdadcd122975b, p)))
-
-    #X = E1.mul(P1, 10000)
-    #Y = E2.mul(P2, 50000)
-
-    # order
-    l = 21888242871839275222246405745257275088548364400416034343698204186575808495617
-
-    # check same order
-    assert(E1.mul(P1, l)==E2.mul(P2, l))
-
+    
+    def mkp(k):
+        sqex = (p + 1) // 4
+        sq2 = Complex(Mod(2, p), Mod(0, p)) ** sqex
+        assert sq2 ** 2 == Complex(Mod(2, p), Mod(0, p))
+        A = Mod(k, p)
+        B = ( (A**3 + 3)/(3 * A) ) ** sqex
+        assert B**2 == (A**3 + 3)/(3 * A)
+        X = Complex(A, B)
+        sqi = sq2 / 2 + sq2 / 2 * Complex(Mod(0, p), Mod(1, p))
+        assert (((X**3 + 3).i)**sqex)**2 == (X**3 + 3).i
+        Y = sqi * ((X**3 + 3).i)**sqex
+        assert (Y**2 == X**3 + 3)
+        
+        return Point(X, Y)
+    
+    P2 = mkp(2)
+    
+    # common order for all points
+    l = p + 1
+    assert E1.mul(P1, l) == E1.mul(P2, l) == "Origin"
+    
     # weil pairing
     w = lambda X, Y: E1.miller(X, Y, l)/E1.miller(Y, X, l)
     
-    print(w(P1, ))
-
-    #print(w(E1.add(E1.mul(P1, 10000), E1.mul(P1, 30000)), E2.mul(P2, 1))==w(E1.mul(P1, 10000), E2.mul(P2, 1)) * w(E1.mul(P1, 30000), E2.mul(P2, 1)))
+    print(w(P1, P2))
     
-    #print(w(E1.mul(P1, 123), E2.mul(P2, 100))==w(E1.mul(P1, 123*100), E2.mul(P2, 1)))
-    
-    #print(w(E1.mul(P1, 1), E2.mul(P2, 1)))
-
-    #print(e(X, Y))
-    #print(e(Z, W))
+    print(w(E1.mul(P1, 100), E1.mul(P2, 100)) == w(E1.mul(P1, 10000), E1.mul(P2, 1)))
