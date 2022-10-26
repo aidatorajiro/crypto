@@ -94,5 +94,5 @@ These python scripts are greatly helped by the stackoverflow post : <https://sta
 
 ## HTTP/2
 
-- muzukasisa.txt - Not actually crypto? Attempt to "netcat" (although using openssl so not completely full-scratch) HTTP/2 connection. Not working for now...
+- muzukasisa.txt - Not actually crypto but obfuscation? Attempt to "netcat" (although using openssl so not completely full-scratch) HTTP/2 connection. Not working for now...
 
