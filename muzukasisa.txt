@@ -1,0 +1,63 @@
+この難しさの違い...
+
+
+nc duckduckgo.com 80
+GET /html/?q=hello HTTP/1.1
+Accept: text/html
+Host: html.duckduckgo.com
+
+
+
+
+
+
+
+
+
+
+
+openssl s_client -connect duckduckgo.com:443
+GET /html/?q=hello HTTP/1.1
+Accept: text/html
+Host: html.duckduckgo.com
+
+
+
+
+
+
+
+
+
+
+
+
+sed -e "s/;.*//" | xxd -r -p | openssl s_client -alpn h2 -connect duckduckgo.com:443 | xxd
+
+50 52 49 20 2a 20 48 54 54 50 2f 32 2e 30 0d 0a 0d 0a 53 4d 0d 0a 0d 0a 0a    ;magic
+
+00 00 00 ; frame Payload length
+04 ; frame type = SETTINGS
+00 ; settings flags
+00 00 00 00 ; Reserved & Stream Identifier
+
+00 00 04 ; frame Payload length
+08 ; frame type = Window Update
+00 ; flags unused
+00 00 00 00 ; settings id
+00 01 00 00 ; window size update
+
+00 00 18    ;frame Payload length
+01 ; frame type = HEADER
+05 ; header flags = END_HEADERS | END_STREAM
+12 34 56 78 ; Reserved&Stream Identifier
+ ; Frame Payload
+82 87 84 41 14
+68 74 6d 6c 2e 64 75 63 6b 64 75 63 6b 67 6f 2e 63 6f 6d
+
+00 00 04 ; frame Payload length
+08 ; frame type = Window Update
+00 ; flags unused
+12 34 56 78 ; headers id
+00 01 00 00 ; window size update
+
