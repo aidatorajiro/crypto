@@ -91,3 +91,8 @@ These python scripts are greatly helped by the stackoverflow post : <https://sta
 - ssl.gp - fullscratch TLS 1.3 related program (WIP?)
 - ssl2.gp - fullscratch TLS 1.3 related program (WIP?)
 - tls13.py - fullscratch TLS 1.3 related program (WIP?)
+
+## HTTP/2
+
+- muzukasisa.txt - Not actually crypto? Attempt to "netcat" (although using openssl so not completely full-scratch) HTTP/2 connection. Not working for now...
+
